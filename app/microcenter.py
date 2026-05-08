@@ -22,9 +22,9 @@ from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Iterable
 
-import httpx
-from curl_cffi import requests as curl_requests
-from curl_cffi.requests.errors import RequestsError
+import httpx # type: ignore
+from curl_cffi import requests as curl_requests # type: ignore
+from curl_cffi.requests.errors import RequestsError # type: ignore
 
 log = logging.getLogger("microcenter")
 
@@ -250,7 +250,7 @@ def _extract_card(card) -> Deal | None:
 
 
 def _parse_listing(html: str) -> list[Deal]:
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "lxml") # pyright: ignore[reportUndefinedVariable]
     cards: Iterable = (
         soup.select("li.product_wrapper")
         or soup.select("article.product_wrapper")
@@ -278,7 +278,7 @@ async def _jittered_sleep() -> None:
 
 
 import urllib.parse
-import nodriver as uc
+import nodriver as uc # type: ignore
 import asyncio
 import time
 
