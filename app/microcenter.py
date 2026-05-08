@@ -23,7 +23,8 @@ from pathlib import Path
 from typing import Iterable
 
 import httpx
-from bs4 import BeautifulSoup
+from curl_cffi import requests as curl_requests
+from curl_cffi.requests.errors import RequestException
 
 log = logging.getLogger("microcenter")
 
@@ -286,6 +287,68 @@ async def fetch_store(store_key: str) -> StoreSnapshot:
         store_name=meta["name"],
         fetched_at=time.time(),
     )
+
+    # Expanded headers to look more like a natural navigation request
+    headers = {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "same-origin",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
+    }
+    cookies = {
+        "storeSelected": "true",
+        "storeId":       meta["id"],
+        "myStore":       "true",
+    }
+
+    # curl_cffi's AsyncSession replaces httpx.AsyncClient
+    # The `impersonate` parameter handles the TLS/HTTP2 fingerprinting AND 
+    # automatically sets the correct User-Agent for that specific browser version.
+    async with curl_requests.AsyncSession(
+        impersonate="chrome110", 
+        headers=headers,
+        cookies=cookies,
+        timeout=REQUEST_TIMEOUT,
+    ) as client:
+        seen: set[str] = set()
+        for page in range(1, MAX_PAGES + 1):
+            params = {
+                "N":           OPEN_BOX_N,
+                "storeid":     meta["id"],
+                "myStore":     "true",
+                "pagecount":   str(PAGE_SIZE),
+                "currentpage": str(page),
+                "sortby":      "match",
+            }
+            try:
+                # curl_cffi uses the standard requests API
+                r = await client.get(SEARCH_URL, params=params)
+                r.raise_for_status()
+            except RequestException as e:
+                snap.error = f"page {page}: {e}"
+                log.warning("fetch failed: %s", e)
+                break
+
+            page_deals = _parse_listing(r.text)
+            log.info("store=%s page=%d parsed=%d", store_key, page, len(page_deals))
+
+            new = 0
+            for d in page_deals:
+                if d.key not in seen:
+                    seen.add(d.key)
+                    snap.deals.append(d)
+                    new += 1
+
+            if new == 0:
+                # Either pagination ended or the page is a duplicate of the previous.
+                break
+
+            await _jittered_sleep()
+
+    return snap
 
     headers = {
         "User-Agent": USER_AGENT,
