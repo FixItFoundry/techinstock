@@ -22,8 +22,8 @@ from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Iterable
 
-import nodriver as uc
-from bs4 import BeautifulSoup
+import nodriver as uc # type: ignore
+from bs4 import BeautifulSoup # type: ignore
 import re
 
 import httpx # type: ignore
