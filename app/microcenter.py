@@ -277,6 +277,11 @@ async def _jittered_sleep() -> None:
     await asyncio.sleep(random.uniform(lo, hi))
 
 
+import urllib.parse
+import nodriver as uc
+import asyncio
+import time
+
 async def fetch_store(store_key: str) -> StoreSnapshot:
     if store_key not in STORES:
         raise ValueError(f"unknown store '{store_key}'")
@@ -288,32 +293,17 @@ async def fetch_store(store_key: str) -> StoreSnapshot:
         fetched_at=time.time(),
     )
 
-    # Expanded headers to look more like a natural navigation request
-    headers = {
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "same-origin",
-        "Sec-Fetch-User": "?1",
-        "Upgrade-Insecure-Requests": "1",
-    }
-    cookies = {
-        "storeSelected": "true",
-        "storeId":       meta["id"],
-        "myStore":       "true",
-    }
+    # Start the stealth browser. 
+    # TIP: For your first run, set headless=False so you can visually confirm 
+    # that it is passing the Akamai interstitial screen.
+    browser = await uc.start(headless=True)
+    
+    try:
+        # Open a new tab
+        page_tab = await browser.get("about:blank")
 
-    # curl_cffi's AsyncSession replaces httpx.AsyncClient
-    # The `impersonate` parameter handles the TLS/HTTP2 fingerprinting AND 
-    # automatically sets the correct User-Agent for that specific browser version.
-    async with curl_requests.AsyncSession(
-        impersonate="chrome110", 
-        headers=headers,
-        cookies=cookies,
-        timeout=REQUEST_TIMEOUT,
-    ) as client:
         seen: set[str] = set()
+        
         for page in range(1, MAX_PAGES + 1):
             params = {
                 "N":           OPEN_BOX_N,
@@ -323,16 +313,24 @@ async def fetch_store(store_key: str) -> StoreSnapshot:
                 "currentpage": str(page),
                 "sortby":      "match",
             }
-            try:
-                # curl_cffi uses the standard requests API
-                r = await client.get(SEARCH_URL, params=params)
-                r.raise_for_status()
-            except RequestsError as e:
-                snap.error = f"page {page}: {e}"
-                log.warning("fetch failed: %s", e)
-                break
-
-            page_deals = _parse_listing(r.text)
+            
+            # nodriver's .get() requires a full string URL, so we encode the params
+            query_string = urllib.parse.urlencode(params)
+            full_url = f"{SEARCH_URL}?{query_string}"
+            
+            # Navigate to the Micro Center search page
+            await page_tab.get(full_url)
+            
+            # CRITICAL: We must sleep to let Akamai's JS run.
+            # Akamai often loads a blank page or a loading spinner for 1-3 seconds 
+            # while it calculates mouse/canvas fingerprints before unhiding the DOM.
+            await asyncio.sleep(4) 
+            
+            # Extract the fully rendered HTML out of the DOM
+            html = await page_tab.get_content()
+            
+            # Pass the HTML right back into your existing BeautifulSoup parser
+            page_deals = _parse_listing(html)
             log.info("store=%s page=%d parsed=%d", store_key, page, len(page_deals))
 
             new = 0
@@ -348,58 +346,13 @@ async def fetch_store(store_key: str) -> StoreSnapshot:
 
             await _jittered_sleep()
 
-    return snap
-
-    headers = {
-        "User-Agent": USER_AGENT,
-        "Accept": "text/html,application/xhtml+xml",
-        "Accept-Language": "en-US,en;q=0.9",
-    }
-    cookies = {
-        "storeSelected": "true",
-        "storeId":       meta["id"],
-        "myStore":       "true",
-    }
-
-    async with httpx.AsyncClient(
-        headers=headers,
-        cookies=cookies,
-        timeout=REQUEST_TIMEOUT,
-        follow_redirects=True,
-    ) as client:
-        seen: set[str] = set()
-        for page in range(1, MAX_PAGES + 1):
-            params = {
-                "N":           OPEN_BOX_N,
-                "storeid":     meta["id"],
-                "myStore":     "true",
-                "pagecount":   str(PAGE_SIZE),
-                "currentpage": str(page),
-                "sortby":      "match",
-            }
-            try:
-                r = await client.get(SEARCH_URL, params=params)
-                r.raise_for_status()
-            except httpx.HTTPError as e:
-                snap.error = f"page {page}: {e}"
-                log.warning("fetch failed: %s", e)
-                break
-
-            page_deals = _parse_listing(r.text)
-            log.info("store=%s page=%d parsed=%d", store_key, page, len(page_deals))
-
-            new = 0
-            for d in page_deals:
-                if d.key not in seen:
-                    seen.add(d.key)
-                    snap.deals.append(d)
-                    new += 1
-
-            if new == 0:
-                # Either pagination ended or the page is a duplicate of the previous.
-                break
-
-            await _jittered_sleep()
+    except Exception as e:
+        snap.error = f"page {page}: {e}"
+        log.warning("fetch failed: %s", e)
+    finally:
+        # Always stop the browser, otherwise you will end up with 
+        # dozens of zombie Chromium processes eating your RAM.
+        browser.stop()
 
     return snap
 

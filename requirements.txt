@@ -3,3 +3,4 @@ uvicorn[standard]==0.32.1
 httpx==0.27.2
 beautifulsoup4
 curl_cffi
+nodriver
