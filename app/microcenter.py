@@ -296,8 +296,11 @@ async def fetch_store(store_key: str) -> StoreSnapshot:
     # Start the stealth browser. 
     # TIP: For your first run, set headless=False so you can visually confirm 
     # that it is passing the Akamai interstitial screen.
-    browser = await uc.start(headless=True)
-    
+    # /usr/bin/chromium is the default install path for Debian/Ubuntu/Alpine
+    browser = await uc.start(
+        headless=True,
+        browser_executable_path="/usr/bin/chromium" 
+    )
     try:
         # Open a new tab
         page_tab = await browser.get("about:blank")
