@@ -22,6 +22,10 @@ from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Iterable
 
+import nodriver as uc
+from bs4 import BeautifulSoup
+import re
+
 import httpx # type: ignore
 from curl_cffi import requests as curl_requests # type: ignore
 from curl_cffi.requests.errors import RequestsError # type: ignore
