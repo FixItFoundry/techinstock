@@ -1,0 +1,88 @@
+{
+  "categories": [
+    {
+      "id": "mac-mini",
+      "name": "Mac Mini",
+      "products": [
+        {
+          "part": "MU9E3LL/A",
+          "name": "Mac mini (M4, 16GB / 512GB)"
+        },
+        {
+          "part": "MU9D3LL/A",
+          "name": "Mac mini (M4, 16GB / 256GB)"
+        }
+      ]
+    },
+    {
+      "id": "mac-studio",
+      "name": "Mac Studio",
+      "products": [
+        {
+          "part": "MU963LL/A",
+          "name": "Mac Studio (M4 Max, 36GB / 512GB)"
+        }
+      ]
+    },
+    {
+      "id": "macbook-air",
+      "name": "MacBook Air",
+      "products": [
+        {
+          "part": "MDH74LL/A",
+          "name": "MacBook Air 13\" (M5, 16GB / 512GB, Silver)"
+        },
+        {
+          "part": "MDHE4LL/A",
+          "name": "MacBook Air 13\" (M5, 16GB / 512GB, Midnight)"
+        },
+        {
+          "part": "MDV94LL/A",
+          "name": "MacBook Air 15\" (M5, 16GB / 512GB, Silver)"
+        },
+        {
+          "part": "MDVH4LL/A",
+          "name": "MacBook Air 15\" (M5, 16GB / 512GB, Midnight)"
+        }
+      ]
+    },
+    {
+      "id": "macbook-pro",
+      "name": "MacBook Pro",
+      "products": [
+        {
+          "part": "MGE64LL/A",
+          "name": "MacBook Pro 16\" (M5 Pro, 48GB / 1TB, Silver)"
+        }
+      ]
+    },
+    {
+      "id": "AirPods Pro",
+      "name": "AirPods Pro 3",
+      "products": [
+        {
+          "part": "MFHP4LL/A",
+          "name": "AirPods Pro 3"
+        }
+      ]
+    },
+    {
+      "id": "MacBook Neo",
+      "name": "MacBook Neo",
+      "products": [
+        {
+          "part": "MHFA4LL/A",
+          "name": "MacBook Neo (13-inch, A18 Pro Chip), Indigo"
+        },
+        {
+          "part": "MHFF4LL/A",
+          "name": "MacBook Neo (13-inch, A18 Pro Chip), Citrus"
+        },
+        {
+          "part": "MHFD4LL/A",
+          "name": "MacBook Neo (13-inch, A18 Pro Chip, Blush"
+        }
+      ]
+    }
+  ]
+}

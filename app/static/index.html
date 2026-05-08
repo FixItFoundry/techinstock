@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>techinstock · Apple</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<div class="grain"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo-mark"></span>
+    <h1>Apple <em>Products in Stock</em></h1>
+  </div>
+  <div class="controls">
+    <a href="/" class="home-link" title="techinstock home">← home</a>
+    <label class="zip-field">
+      <span>ZIP</span>
+      <input id="zip" type="text" inputmode="numeric" maxlength="5" />
+    </label>
+    <button id="refresh" class="btn-primary">
+      <span class="btn-label">Refresh</span>
+      <span class="btn-kbd">⏎</span>
+    </button>
+    <button id="add-toggle" class="btn-ghost" title="Track a new part number">＋ Add</button>
+  </div>
+</header>
+
+<section id="add-panel" class="add-panel" hidden>
+  <form id="add-form">
+    <input name="category_id" placeholder="category (e.g. mac-mini)" required />
+    <input name="part" placeholder="part number (e.g. MU9D3LL/A)" required />
+    <input name="name" placeholder="friendly name" required />
+    <button type="submit" class="btn-primary">Add</button>
+  </form>
+  <p class="hint">Tip: find part numbers in the URL on apple.com after configuring a Mac (e.g. <code>?mtm=MU9D3LL/A</code>). Category name is inferred from the ID — use an existing one to group with it.</p>
+</section>
+
+<main id="dashboard" class="dashboard">
+  <div class="status-bar">
+    <span id="status-dot" class="dot dot-idle"></span>
+    <span id="status-text">Loading…</span>
+    <span class="status-spacer"></span>
+    <span id="last-checked" class="last-checked"></span>
+  </div>
+  <div id="categories"></div>
+</main>
+
+<footer class="footer">
+  <span>Self-hosted · data from apple.com/shop</span>
+  <span id="store-count"></span>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
