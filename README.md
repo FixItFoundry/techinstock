@@ -1,4 +1,4 @@
-# techinstock
+# Tech In Stock
 
 A self-hosted homelab dashboard for tracking tech availability and deals. Three
 trackers, one Docker container:
