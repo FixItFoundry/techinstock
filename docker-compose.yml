@@ -1,0 +1,20 @@
+services:
+  techinstock:
+    build: .
+    image: techinstock:latest
+    container_name: techinstock
+    restart: unless-stopped
+    ports:
+      - "8765:8000"
+    environment:
+      # Default ZIP shown in the Apple tracker on first load
+      DEFAULT_ZIP: "11793"
+      # Path inside the container where editable catalogs / caches live
+      PRODUCTS_FILE: "/data/products.json"
+      # Get a free key at https://developer.bestbuy.com — required for the
+      # Best Buy tracker. Leave blank to disable that tracker (the page will
+      # show a clear "set this and rebuild" banner).
+      BESTBUY_API_KEY: ""
+    volumes:
+      # Persist catalogs + scrape caches across rebuilds
+      - ./data:/data
