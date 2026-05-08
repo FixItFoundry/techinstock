@@ -24,7 +24,7 @@ from typing import Iterable
 
 import httpx
 from curl_cffi import requests as curl_requests
-from curl_cffi.requests.errors import RequestException
+from curl_cffi.requests.errors import RequestsError
 
 log = logging.getLogger("microcenter")
 
@@ -327,7 +327,7 @@ async def fetch_store(store_key: str) -> StoreSnapshot:
                 # curl_cffi uses the standard requests API
                 r = await client.get(SEARCH_URL, params=params)
                 r.raise_for_status()
-            except RequestException as e:
+            except RequestsError as e:
                 snap.error = f"page {page}: {e}"
                 log.warning("fetch failed: %s", e)
                 break
