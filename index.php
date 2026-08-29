@@ -18,9 +18,9 @@ require_once __DIR__ . '/lib/bestbuy.php';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
 
-// Static files: let the built-in server serve them.
-if (str_starts_with($path, '/static/') && is_file(__DIR__ . $path)) {
-    return false;
+// Static files: serve them directly (docroot-independent).
+if (str_starts_with($path, '/static/') && is_file(ROOT_DIR . '/' . ltrim($path, '/'))) {
+    serve_static($path);
 }
 
 function route_404(): void {

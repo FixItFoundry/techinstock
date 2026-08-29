@@ -5,6 +5,7 @@
 declare(strict_types=1);
 
 const APP_DIR = __DIR__;
+define('ROOT_DIR', dirname(__DIR__));
 
 function env(string $key, string $default = ''): string {
     $v = getenv($key);
@@ -22,7 +23,7 @@ function data_dir(): string {
 }
 
 function products_path(): string {
-    return env('PRODUCTS_FILE', APP_DIR . '/products.json');
+    return env('PRODUCTS_FILE', ROOT_DIR . '/products.json');
 }
 
 // ---------------------------------------------------------------------------
@@ -110,13 +111,44 @@ function cache_write(string $file, $data): void {
 
 // Render a view file (HTML shell) to the client.
 function render_view(string $name): void {
-    $file = APP_DIR . '/views/' . $name;
+    $file = ROOT_DIR . '/views/' . $name;
     if (!is_file($file)) {
         http_response_code(404);
         echo 'Not found';
         exit;
     }
     header('Content-Type: text/html; charset=utf-8');
+    readfile($file);
+    exit;
+}
+
+// Serve a static asset (css/js/etc.) from the project root, with the right
+// Content-Type. Robust regardless of the built-in server's document root.
+function serve_static(string $rel): void {
+    $file = ROOT_DIR . '/' . ltrim($rel, '/');
+    if (!is_file($file)) {
+        http_response_code(404);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Not found';
+        exit;
+    }
+    $mime = 'application/octet-stream';
+    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    switch ($ext) {
+        case 'css':  $mime = 'text/css'; break;
+        case 'js':   $mime = 'application/javascript'; break;
+        case 'html': $mime = 'text/html'; break;
+        case 'json': $mime = 'application/json'; break;
+        case 'svg':  $mime = 'image/svg+xml'; break;
+        case 'png':  $mime = 'image/png'; break;
+        case 'jpg':
+        case 'jpeg': $mime = 'image/jpeg'; break;
+        case 'gif':  $mime = 'image/gif'; break;
+        case 'ico':  $mime = 'image/x-icon'; break;
+        case 'woff2':$mime = 'font/woff2'; break;
+    }
+    header('Content-Type: ' . $mime);
+    header('Content-Length: ' . filesize($file));
     readfile($file);
     exit;
 }
