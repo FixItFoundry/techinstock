@@ -4,7 +4,7 @@ const state = {
   storeKey: null,
   selectedState: "NY",
   snapshot: null,
-  sort: "discount_pct",
+  sort: "-discount_pct",
   category: "All",
   minPct: 0,
   search: "",
