@@ -46,7 +46,7 @@ async function refresh() {
 }
 function renderKeyBanner() {
   const banner = $("#key-warning");
-  if (state.snapshot && state.snapshot.api_key_set === false) banner.removeAttribute("hidden");
+  if (state.snapshot && !state.snapshot.source) banner.removeAttribute("hidden");
   else banner.setAttribute("hidden", "");
 }
 function renderConditionChips() {
@@ -94,8 +94,8 @@ function render() {
   const snap = state.snapshot || { deals: [], fetched_at: null, error: null, api_key_set: true };
   $("#stat-time").textContent = fmtTime(snap.fetched_at);
   $("#stat-count").textContent = (snap.deals || []).length;
-  $("#stat-key").textContent = snap.api_key_set ? "set" : "missing";
-  $("#stat-key").style.color = snap.api_key_set ? "var(--ok)" : "var(--bad)";
+  $("#stat-key").textContent = snap.source === "scraper" ? "scraper" : (snap.api_key_set ? "set" : "missing");
+  $("#stat-key").style.color = snap.source ? "var(--ok)" : "var(--bad)";
 
   let deals = (snap.deals || []).slice();
   if (state.category !== "All") deals = deals.filter(d => d.category === state.category);
@@ -112,7 +112,7 @@ function render() {
   $("#meta-total").textContent = deals.length;
 
   if (snap.error && (!snap.deals || snap.deals.length === 0)) {
-    $("#deals").innerHTML = `<div class="empty"><div class="big">No data yet</div>${escapeHtml(snap.error)}<br><br>${snap.api_key_set === false ? "Set your API key, then hit <b>↻ refresh</b>." : "Hit <b>↻ refresh</b> to fetch live."}</div>`;
+     $("#deals").innerHTML = `<div class="empty"><div class="big">No data yet</div>${escapeHtml(snap.error)}<br><br>${!snap.source ? "Set <b>BESTBUY_API_KEY</b> or <b>FLARESOLVERR_URL</b>, then hit <b>↻ refresh</b>." : "Hit <b>↻ refresh</b> to fetch live."}</div>`;
     return;
   }
   if (deals.length === 0) {

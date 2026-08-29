@@ -158,7 +158,8 @@ if ($method === 'POST' && $path === '/microcenter/api/refresh') {
 if ($method === 'GET' && $path === '/bestbuy/api/status') {
     $snap = bb_get_cached();
     send_json([
-        'api_key_set' => bb_get_api_key() !== null,
+        'api_key_set' => bb_has_source(),
+        'source' => $snap['source'] ?? null,
         'fetched_at' => $snap['fetched_at'] ?? null,
         'count' => $snap ? count($snap['deals']) : 0,
         'error' => $snap['error'] ?? null,
@@ -172,7 +173,8 @@ if ($method === 'GET' && $path === '/bestbuy/api/deals') {
             'fetched_at' => null,
             'deals' => [],
             'error' => 'no cache yet — hit refresh',
-            'api_key_set' => bb_get_api_key() !== null,
+            'api_key_set' => bb_has_source(),
+            'source' => null,
         ]);
     }
     send_json($snap);

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" width="160" height="60">
+  <defs>
+    <linearGradient id="xps-chrome" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#94A3B8"/>
+    </linearGradient>
+  </defs>
+  <!-- Official XPS Laptop Cutout Brand Badge -->
+  <g fill="url(#xps-chrome)">
+    <!-- X -->
+    <path d="M10 12 L24 12 L38 30 L52 12 L66 12 L45 38 L68 52 L54 52 L38 41 L22 52 L8 52 L31 38 Z" />
+    <!-- P -->
+    <path d="M72 12 L98 12 C108 12 115 17 115 26 C115 35 108 40 98 40 L84 40 L84 52 L72 52 Z M84 20 L84 32 L96 32 C101 32 104 29 104 26 C104 23 101 20 96 20 Z" />
+    <!-- S -->
+    <path d="M120 42 C120 48 126 53 136 53 C146 53 154 48 154 41 C154 33 146 30 135 28 C127 26 123 24 123 20 C123 16 127 13 134 13 C142 13 146 17 147 21 L157 19 C155 12 147 6 134 6 C122 6 112 12 112 21 C112 28 119 32 130 34 C139 36 143 38 143 42 C143 46 138 49 133 49 C126 49 122 45 121 40 Z" />
+  </g>
+</svg>

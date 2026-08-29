@@ -1,0 +1,690 @@
+query PlpView_ProductListItem_Init($skuId: String!, $productPriceInput: ProductItemPriceInput!, $isBestbuyMember: Boolean!, $skuOffersInput: ProductSkuOffersInput!, $multiImageEnabled: Boolean! = true, $useDisplayablePriceFields: Boolean! = true, $usePlusXOffersFields: Boolean! = true, $useMembershipUpsellFields: Boolean! = true, $useEcoRebatesFields: Boolean! = true, $useSpendAndGetFields: Boolean! = true, $useCaboSucoFields: Boolean! = true, $useGiftWithPurchaseFields: Boolean! = true, $useOffersFields: Boolean! = true, $imageLimit: Int, $salesChannel: String!, $includeAppleIntelligenceFragment: Boolean!, $isSafeMode: Boolean!) {
+  productBySkuId(skuId: $skuId) {
+    ...ProductListItemFragment
+    __typename
+    skuId
+    openBoxCondition
+  }
+}
+
+fragment ProductListItemFragment on Product {
+  bsin
+  skuId
+  url {
+    pdp
+    __typename
+  }
+  ...BadgeV2
+  parentalAdvisory
+  ...BSIN_FRAGMENT_PLP_DATA
+  arModels {
+    animated
+    createDate
+    creator
+    format
+    title
+    type
+    uri
+    __typename
+  }
+  ...ReviewStats_Fragment
+  ...AppleIntelligenceProductFragment @include(if: $includeAppleIntelligenceFragment)
+  ...NotifyMe_ProductBySkuId
+  ...FulfillmentProductBySkuIdFragment @skip(if: $isSafeMode)
+  ...MarketplaceFragment
+  primaryImage {
+    piscesHref
+    mediaType
+    href
+    height
+    altText
+    __typename
+  }
+  reviewInfo {
+    isReviewable
+    __typename
+  }
+  productVariationListDisplay {
+    ...PlpViewSharedProductVariationFragment
+    ...PlpViewInboundMarketplaceProductVariationFragment
+    __typename
+  }
+  esrbRating {
+    code
+    __typename
+  }
+  name {
+    short
+    title
+    __typename
+  }
+  ...SkuMultiImageFragment @include(if: $multiImageEnabled)
+  manufacturer {
+    modelNumber
+    __typename
+  }
+  publisher
+  dotComStreetDate
+  streetDateDisplay
+  whatItIs
+  primaryArtists
+  parentalAdvisory
+  isNew
+  ...PlpView_BadgesFragment
+  ...ProductPriceFragment
+  dotComDisplayStatus
+  productRecalled
+  openBoxCondition
+  condition @skip(if: $isSafeMode) {
+    type
+    __typename
+  }
+  __typename
+}
+
+fragment PlpView_BadgesFragment on Product {
+  badges {
+    detailsHref
+    displayName
+    endDate
+    imageHref
+    sortOrder
+    startDate
+    typeCode
+    __typename
+  }
+  operationalAttributes {
+    values
+    __typename
+  }
+  __typename
+  skuId
+  openBoxCondition
+}
+
+fragment SkuMultiImageFragment on Product {
+  images(filter: {limit: $imageLimit}) {
+    piscesHref
+    rel
+    supportsOverlayDimensions
+    altText
+    __typename
+  }
+  __typename
+  skuId
+  openBoxCondition
+}
+
+fragment AppleIntelligenceProductFragment on Product {
+  name {
+    short
+    __typename
+  }
+  primaryImage {
+    piscesHref
+    __typename
+  }
+  hierarchy {
+    bbypres {
+      id
+      categoryDetail {
+        broaderTerms {
+          primaryLineage {
+            id
+            __typename
+          }
+          __typename
+        }
+        id
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  bsin
+  buyingOptions {
+    product {
+      appleIntelligencePrice: price(input: {salesChannel: $salesChannel}) {
+        skuId
+        regularPrice
+        customerPrice
+        categoryId
+        openBoxPrice
+        employeePrice
+        offerPrice
+        priceEventType
+        currentPrice
+        paymentOptions {
+          maximumTotalFinanceCharge
+          minimumTotalFinanceCharge
+          __typename
+        }
+        __typename
+      }
+      __typename
+      skuId
+      openBoxCondition
+    }
+    __typename
+  }
+  condition {
+    type
+    __typename
+  }
+  __typename
+  skuId
+  openBoxCondition
+}
+
+fragment FulfillmentProductBySkuIdFragment on Product {
+  brand
+  brandId
+  classification {
+    class {
+      id
+      __typename
+    }
+    __typename
+  }
+  isSmallMediumBusiness
+  releaseDateDisplayValue
+  whatItIs
+  eligibleGatedEventCustomerSegments {
+    canPurchaseNow
+    __typename
+  }
+  isConstrainedHighVelocity
+  inStoreServiceType
+  buyingOptions {
+    type
+    product {
+      openBoxCondition
+      openBoxOptions {
+        code
+        __typename
+      }
+      inStoreServiceType
+      price(input: $productPriceInput) {
+        openBoxCondition
+        __typename
+      }
+      primaryImage {
+        piscesHref
+        __typename
+      }
+      name {
+        short
+        __typename
+      }
+      __typename
+      skuId
+    }
+    pdpUrl
+    __typename
+  }
+  price(input: $productPriceInput) {
+    customerPrice
+    mobileContracts {
+      isDefaultContract
+      purchaseType
+      numberOfPayments
+      __typename
+    }
+    __typename
+  }
+  waitlists {
+    enrollmentPaused
+    id
+    name
+    type
+    __typename
+  }
+  badgesV2 {
+    label
+    __typename
+  }
+  ...MpFragment
+  __typename
+  skuId
+  openBoxCondition
+}
+
+fragment MpFragment on Product {
+  bsinProduct {
+    bsin
+    products {
+      openBoxCondition
+      condition {
+        type
+        __typename
+      }
+      seller {
+        classification
+        __typename
+      }
+      skuId
+      __typename
+    }
+    __typename
+  }
+  bsin
+  seller {
+    classification
+    id
+    __typename
+  }
+  __typename
+  skuId
+  openBoxCondition
+}
+
+fragment ReviewStats_Fragment on Product {
+  skuId
+  reviewInfo {
+    averageRating
+    isReviewable
+    reviewCount
+    syndicatedReviewSummary {
+      clientDisplayName
+      overallRating
+      totalReviewCount
+      __typename
+    }
+    __typename
+  }
+  url {
+    relativePdp
+    __typename
+  }
+  __typename
+  openBoxCondition
+}
+
+fragment BSIN_FRAGMENT_PLP_DATA on Product {
+  bsinProduct {
+    seoPdpUrl
+    bsin
+    __typename
+  }
+  __typename
+  skuId
+  openBoxCondition
+}
+
+fragment BadgeV2Minimal on Product {
+  badgesV2 {
+    badgeId
+    label
+    __typename
+  }
+  __typename
+  skuId
+  openBoxCondition
+}
+
+fragment BadgeV2 on Product {
+  ...BadgeV2Minimal
+  badgesV2 {
+    categoryId
+    categoryName
+    description
+    experienceUrl
+    rank
+    type
+    __typename
+  }
+  skuId
+  __typename
+  openBoxCondition
+}
+
+fragment MarketplaceFragment on Product {
+  plpFeaturedSku: featuredSkuRank(filter: {isBestbuyMember: $isBestbuyMember}) {
+    rank
+    rankingId
+    __typename
+  }
+  bsin
+  url {
+    skuSpecificUrl
+    __typename
+  }
+  __typename
+  skuId
+  openBoxCondition
+}
+
+fragment ProductPriceFragment on Product {
+  name {
+    short
+    title
+    __typename
+  }
+  primaryImage {
+    piscesHref
+    __typename
+  }
+  openBoxCondition
+  whatItIs
+  ...PriceExperienceInit_Medium_Product
+  __typename
+  skuId
+}
+
+fragment PriceExperienceInit_Medium_Product on Product {
+  price(input: $productPriceInput) {
+    isEcoRebateEligible @include(if: $useEcoRebatesFields)
+    showPlusOffers @include(if: $usePlusXOffersFields)
+    ...CaboSucoInit_ItemPrice @include(if: $useCaboSucoFields)
+    ...GiftWithPurchaseInit_ItemPrice @include(if: $useGiftWithPurchaseFields)
+    ...ExperimentsInit_ItemPrice
+    ...MembershipUpsellInit_ItemPrice @include(if: $useMembershipUpsellFields)
+    ...PriceBlockInit_Medium_ItemPrice
+    ...PriceExperienceInit_RewardCabos_ItemPrice @include(if: $useSpendAndGetFields)
+    ...SpendAndGetInit_ItemPrice @include(if: $useSpendAndGetFields)
+    ...TieredOffersTrackingInit_ItemPrice
+    __typename
+  }
+  skuId
+  ...OffersInit_Product @include(if: $useOffersFields)
+  __typename
+  openBoxCondition
+}
+
+fragment CaboSucoInit_ItemPrice on ItemPrice {
+  skuId
+  customerSelectedDiscountsAvailable {
+    offerId
+    offerName
+    type
+    couponId
+    savingsAdjustment
+    effectiveStartDate
+    effectiveEndDate
+    effectiveEndTime
+    isDiscountSelected
+    offerPrice
+    businessUnit
+    customerAttribute
+    __typename
+  }
+  __typename
+}
+
+fragment GiftWithPurchaseInit_ItemPrice on ItemPrice {
+  giftSkus {
+    __typename
+    brand
+    isGiftCard
+    isRequiredWithOffer
+    offerId
+    parentSkus
+    quantity
+    savings
+    skuId
+  }
+  priceWithCart {
+    giftSkus {
+      __typename
+      brand
+      isGiftCard
+      isRequiredWithOffer
+      offerId
+      parentSkus
+      quantity
+      savings
+      skuId
+    }
+    totalGiftSavings
+    __typename
+  }
+  __typename
+}
+
+fragment ExperimentsInit_ItemPrice on ItemPrice {
+  experiments {
+    membershipCarouselPlacement
+    __typename
+  }
+  __typename
+}
+
+fragment MembershipUpsellInit_ItemPrice on ItemPrice {
+  whatIfPrice {
+    planPaidMember2 {
+      price
+      savings
+      savingsPercent
+      __typename
+    }
+    planPaidMember3 {
+      price
+      savings
+      savingsPercent
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment PriceBlockInit_Medium_ItemPrice on ItemPrice {
+  heroRenderPriceOptions
+  financeOption {
+    financeTerm
+    monthlyPayment
+    offerId
+    planType
+    rate
+    totalCost
+    totalCostIncludingTax
+    __typename
+  }
+  skuId
+  ...PriceBlockInit_Small_ItemPrice
+  __typename
+}
+
+fragment PriceBlockInit_Small_ItemPrice on ItemPrice {
+  dealExpirationTimeStamp
+  ...PriceBlockInit_Compact_ItemPrice
+  __typename
+}
+
+fragment PriceBlockInit_Compact_ItemPrice on ItemPrice {
+  displayableRegularPrice @include(if: $useDisplayablePriceFields)
+  regularPrice @skip(if: $useDisplayablePriceFields)
+  showTotalSavings
+  totalSavings
+  totalSavingsPercent
+  openBoxSavings
+  preferredBadging
+  puckDisplayMessage
+  puckMessageURL
+  priceWithCart {
+    totalOfferSavings
+    adjustedCartItems {
+      skuId
+      savingsAdjustment
+      previousCustomerPrice
+      newCustomerPrice
+      __typename
+    }
+    __typename
+  }
+  totalNonPaidMemberSavings
+  totalPaidMemberSavings
+  mobileContracts {
+    hasPriceRange
+    regularPrice
+    contractTotalSavings
+    showTotalSavings
+    totalSavingsPercent
+    instantSavings
+    totalSavingsPerTerm
+    carrierCode
+    downPaymentAmount
+    matchesCurrentPrice
+    id
+    purchaseType
+    __typename
+  }
+  ...PriceBlockInit_Single_ItemPrice
+  __typename
+}
+
+fragment PriceBlockInit_Single_ItemPrice on ItemPrice {
+  customerPrice @skip(if: $useDisplayablePriceFields)
+  displayableCustomerPrice @include(if: $useDisplayablePriceFields)
+  icrCode
+  isMAP @skip(if: $useDisplayablePriceFields)
+  restrictedPriceDisplayMessage @include(if: $useDisplayablePriceFields)
+  strictMapIcr @skip(if: $useDisplayablePriceFields)
+  openBoxCondition
+  tieredOffersTracking {
+    savings
+    __typename
+  }
+  connectionType
+  mobileContracts {
+    customerPrice
+    currentPrice
+    numberOfPayments
+    isDefaultContract
+    __typename
+  }
+  skuId
+  __typename
+}
+
+fragment PriceExperienceInit_RewardCabos_ItemPrice on ItemPrice {
+  __typename
+  skuId
+  rewardCabosAvailable {
+    offerId
+    offerName
+    type
+    subType
+    effectiveStartDateTime
+    effectiveEndDateTime
+    __typename
+  }
+}
+
+fragment SpendAndGetInit_ItemPrice on ItemPrice {
+  spendAndGetCabosAvailable {
+    offerId
+    offerName
+    optInCode
+    isOfferActivated
+    effectiveStartDate
+    effectiveEndDate
+    __typename
+  }
+  __typename
+}
+
+fragment TieredOffersTrackingInit_ItemPrice on ItemPrice {
+  tieredOffersTracking {
+    amountConsideredToNextTier
+    amountRemainingToNextTier
+    nextTierId
+    quantityConsideredToNextTier
+    quantityRemainingToNextTier
+    savings
+    savingsType
+    tieredOffersGroupName
+    trackingBy
+    tiers {
+      discountValue
+      minPurchaseAmount
+      minQuantity
+      offerId
+      qualified
+      tierId
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment OffersInit_Product on Product {
+  offers(input: $skuOffersInput) {
+    ...OffersInit_SkuOffersConnection
+    __typename
+  }
+  __typename
+  skuId
+  openBoxCondition
+}
+
+fragment OffersInit_SkuOffersConnection on SkuOffersConnection {
+  __typename
+  offers {
+    ...OffersInit_SkuOffer
+    __typename
+  }
+}
+
+fragment OffersInit_SkuOffer on SkuOffer {
+  __typename
+  hotOffer
+  offerId
+  offerType
+  complexMemberOffer
+}
+
+fragment NotifyMe_ProductBySkuId on Product {
+  bsin
+  skuId
+  notifyMeEligible
+  dotComDisplayStatus
+  __typename
+  openBoxCondition
+}
+
+fragment PlpViewInboundMarketplaceProductVariationFragment on InboundProductVariation {
+  productBsinVariations {
+    bsin
+    bsinProduct {
+      featuredSKU(filter: {isBestbuyMember: $isBestbuyMember}) {
+        skuId
+        __typename
+      }
+      bsin
+      __typename
+    }
+    variations {
+      value
+      rawName
+      image {
+        piscesHref
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment PlpViewSharedProductVariationFragment on InboundProductVariation {
+  type
+  variationId
+  variationTypes {
+    definition
+    definitionDetails {
+      displayName
+      value
+      __typename
+    }
+    displayName
+    rawName
+    sequence
+    __typename
+  }
+  title
+  __typename
+}

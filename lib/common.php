@@ -51,6 +51,36 @@ function http_get(string $url, array $headers = [], array $opts = []): array {
     return [$status, $body === false ? '' : $body, $err];
 }
 
+// FlareSolverr proxy: solves bot challenges and reuses one browser session, so
+// cookies persist across calls (warm the session with a GET, then POST through
+// the same container). $postData (raw body) makes it a POST; $headers are set
+// on the browser request. Returns the solved response body, or '' on failure.
+function fs_request(string $url, ?string $postData = null, array $headers = []): string {
+    $solver = rtrim(env('FLARESOLVERR_URL', 'http://flaresolverr:8191'), '/');
+    $payload = ['cmd' => $postData !== null ? 'request.post' : 'request.get', 'url' => $url, 'maxTimeout' => 60000];
+    if ($headers) {
+        $payload['headers'] = $headers;
+    }
+    if ($postData !== null) {
+        $payload['postData'] = $postData;
+    }
+    [$status, $body] = http_get($solver . '/v1', [
+        'Content-Type: application/json',
+        'Accept: application/json',
+    ], ['timeout' => 90, 'post' => json_encode($payload)]);
+    if ($status < 200 || $status >= 300 || $body === '') {
+        return '';
+    }
+    $dec = json_decode($body, true);
+    if (!is_array($dec)) {
+        return '';
+    }
+    if (($dec['status'] ?? '') === 'ok' && isset($dec['solution']['response'])) {
+        return (string) $dec['solution']['response'];
+    }
+    return '';
+}
+
 function http_get_json(string $url, array $headers = [], array $opts = []): ?array {
     [$status, $body, $err] = http_get($url, $headers, $opts);
     if ($err !== '' || $status >= 400) {

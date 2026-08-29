@@ -1,0 +1,25 @@
+fragment MboSimpleAvailabilityFragment on Query {
+  bsinBuyingOptions(
+    input: {skuId: $skuId, bsin: $bsin, salesChannel: $salesChannel, postalCode: $postalCode, locationId: $locationId, context: $context, customerId: $customerId, effectivePlanPaidMemberType: $effectivePlanPaidMemberType}
+  ) {
+    bsin
+    lowestAvailableBSINPrice
+    highestAvailableBSINPrice
+    priceAndAvailabilityInfo {
+      driverSku
+      skuId
+      product {
+        skuId
+        openBoxCondition
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+query MPX_MoreBuyingOptionsSimpleAvailabilityData($skuId: String!, $salesChannel: String!, $postalCode: String!, $locationId: String!, $bsin: String!, $context: ButtonContext!, $customerId: String, $effectivePlanPaidMemberType: PlanPaidMemberTypeEnum) {
+  ...MboSimpleAvailabilityFragment
+}

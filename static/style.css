@@ -97,18 +97,116 @@ a {
    1. LANDING PAGE: URBAN CYBERPUNK + STICKER BOMB (.page-home)
    ========================================================================== */
 
+/* StickerBomb Dynamic Layer */
+.stickerbomb-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sticker-bomb-item {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, filter 0.25s ease;
+  will-change: transform;
+  user-select: none;
+}
+
+.sticker-diecut-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 3px solid #ffffff;
+  box-shadow: 
+    0 3px 8px rgba(0, 0, 0, 0.4),
+    0 10px 24px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Subtle glossy sheen reflection on vinyl stickers */
+.sticker-diecut-wrap::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    135deg, 
+    rgba(255, 255, 255, 0.45) 0%, 
+    rgba(255, 255, 255, 0.1) 40%, 
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.sticker-img {
+  display: block;
+  object-fit: contain;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+  transition: filter 0.2s ease;
+}
+
+.sticker-bomb-item:hover {
+  filter: drop-shadow(0 0 16px rgba(0, 240, 255, 0.75));
+}
+
+.sticker-bomb-item:hover .sticker-diecut-wrap {
+  box-shadow: 
+    0 6px 18px rgba(0, 0, 0, 0.55),
+    0 18px 40px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(0, 240, 255, 0.8),
+    inset 0 1px 2px rgba(255, 255, 255, 1);
+}
+
+/* Specialized badge backgrounds for white/light vector decals */
+.sticker-minisforum .sticker-diecut-wrap,
+.sticker-apple .sticker-diecut-wrap,
+.sticker-alienware .sticker-diecut-wrap,
+.sticker-asusrog .sticker-diecut-wrap,
+.sticker-steam .sticker-diecut-wrap,
+.sticker-steamdeck .sticker-diecut-wrap,
+.sticker-sony .sticker-diecut-wrap,
+.sticker-windows .sticker-diecut-wrap {
+  background: #0f141f;
+  border-color: #ffffff;
+}
+
+.cyber-bg-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: 
+    radial-gradient(ellipse at 50% 30%, rgba(10, 13, 20, 0.65) 0%, rgba(10, 13, 20, 0.85) 75%, rgba(6, 8, 12, 0.95) 100%),
+    linear-gradient(180deg, rgba(10, 13, 20, 0.5) 0%, rgba(10, 13, 20, 0.85) 100%);
+  backdrop-filter: blur(0.5px);
+}
+
 .page-home {
   background-color: var(--cyber-bg);
   color: var(--cyber-text);
   font-family: var(--font-sans);
-  background-image: 
-    radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(255, 0, 85, 0.10) 0%, transparent 45%),
-    url('/static/circuit-bg.svg');
-  background-size: 100% 100%, 100% 100%, 160px 160px;
-  background-position: 0 0, 0 0, 0 0;
   overflow-x: hidden;
   position: relative;
+  min-height: 100vh;
 }
 
 .page-home .home {
