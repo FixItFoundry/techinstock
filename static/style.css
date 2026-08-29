@@ -184,6 +184,16 @@ a {
   border-color: #ffffff !important;
 }
 
+.sticker-bestbuy .sticker-diecut-wrap {
+  background: #0046be !important;
+  border-color: #ffffff !important;
+}
+
+.sticker-microcenter .sticker-diecut-wrap {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
 .sticker-steam .sticker-diecut-wrap,
 .sticker-asusrog .sticker-diecut-wrap,
 .sticker-alienware .sticker-diecut-wrap {
