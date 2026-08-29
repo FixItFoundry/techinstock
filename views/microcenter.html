@@ -15,7 +15,7 @@
     <img src="/static/microcenter-logo.svg" alt="Micro Center" class="brand-logo-img mc-logo-img">
     <div class="brand-text">
       <h1>Open Box <em>Deals</em></h1>
-      <small>Live Inventory · NY Metro Stores</small>
+      <small>Live Open-Box Inventory · Nationwide Stores</small>
     </div>
   </div>
   <div class="stat-bar" id="statbar">
@@ -31,7 +31,11 @@
 
 <section class="controls mc-store-bar">
   <div class="group">
-    <span class="group-label">Select Store</span>
+    <span class="group-label">State</span>
+    <select id="state-select" class="custom-select mc-state-select" aria-label="Select State"></select>
+  </div>
+  <div class="group flex-grow">
+    <span class="group-label">Store Location</span>
     <div id="store-tabs" class="group store-tabs-wrap"></div>
   </div>
 </section>

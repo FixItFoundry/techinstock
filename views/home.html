@@ -61,9 +61,9 @@
         <img src="/static/microcenter-logo.svg" alt="Micro Center" class="sticker-brand-logo">
       </div>
       <h2>Open Box <em>Deals</em></h2>
-      <p class="blurb">Unbeatable clearance & open-box deals scraped across NY-area stores, ranked by discount %.</p>
+      <p class="blurb">Unbeatable clearance & open-box deals scraped across 28+ Micro Center stores nationwide, ranked by discount %.</p>
       <ul class="tracker-features">
-        <li>Per-store live inventory & categories</li>
+        <li>Filter by State & local store location</li>
         <li>Retail vs Open-Box price savings</li>
       </ul>
       <div class="stats">
@@ -119,16 +119,11 @@
     document.getElementById("apple-zip").textContent = d.default_zip || "—";
   }).catch(() => {});
   fetch("/microcenter/api/stores").then(r => r.json()).then(async (d) => {
-    let best = { count: 0, fetched_at: null };
-    await Promise.all(Object.keys(d.stores).map(async (k) => {
-      try {
-        const s = await fetch(`/microcenter/api/deals?store=${k}`).then(r => r.json());
-        if ((s.deals || []).length > best.count) best = { count: s.deals.length, fetched_at: s.fetched_at };
-        else if (best.count === 0 && s.fetched_at && !best.fetched_at) best.fetched_at = s.fetched_at;
-      } catch (e) {}
-    }));
-    document.getElementById("mc-count").textContent = best.count || "0";
-    document.getElementById("mc-time").textContent = fmtTime(best.fetched_at);
+    try {
+      const s = await fetch(`/microcenter/api/deals?store=${d.default || 'westbury'}`).then(r => r.json());
+      document.getElementById("mc-count").textContent = (s.deals || []).length || "0";
+      document.getElementById("mc-time").textContent = fmtTime(s.fetched_at);
+    } catch (e) {}
   }).catch(() => {});
   fetch("/bestbuy/api/status").then(r => r.json()).then(d => {
     document.getElementById("bb-count").textContent = d.api_key_set ? (d.count || "0") : "no key";

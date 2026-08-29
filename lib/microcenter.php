@@ -15,10 +15,54 @@ declare(strict_types=1);
 require_once __DIR__ . '/common.php';
 
 const MC_STORES = [
-    'westbury' => ['id' => '065', 'name' => 'Westbury, NY'],
-    'flushing' => ['id' => '051', 'name' => 'Flushing, NY'],
-    'yonkers'  => ['id' => '105', 'name' => 'Yonkers, NY'],
-    'brooklyn' => ['id' => '115', 'name' => 'Brooklyn, NY'],
+    // California
+    'tustin'          => ['id' => '101', 'name' => 'Tustin, CA', 'state' => 'CA'],
+    'santa-clara'     => ['id' => '195', 'name' => 'Santa Clara, CA', 'state' => 'CA'],
+    // Colorado
+    'denver'          => ['id' => '181', 'name' => 'Denver, CO', 'state' => 'CO'],
+    // Florida
+    'miami'           => ['id' => '045', 'name' => 'Miami, FL', 'state' => 'FL'],
+    // Georgia
+    'duluth'          => ['id' => '041', 'name' => 'Duluth, GA', 'state' => 'GA'],
+    'marietta'        => ['id' => '171', 'name' => 'Marietta, GA', 'state' => 'GA'],
+    // Illinois
+    'chicago'         => ['id' => '151', 'name' => 'Chicago, IL', 'state' => 'IL'],
+    'westmont'        => ['id' => '025', 'name' => 'Westmont, IL', 'state' => 'IL'],
+    // Indiana
+    'indianapolis'    => ['id' => '131', 'name' => 'Indianapolis, IN', 'state' => 'IN'],
+    // Kansas
+    'overland-park'   => ['id' => '191', 'name' => 'Overland Park, KS', 'state' => 'KS'],
+    // Massachusetts
+    'cambridge'       => ['id' => '121', 'name' => 'Cambridge, MA', 'state' => 'MA'],
+    // Maryland
+    'rockville'       => ['id' => '085', 'name' => 'Rockville, MD', 'state' => 'MD'],
+    'parkville'       => ['id' => '125', 'name' => 'Parkville (Baltimore), MD', 'state' => 'MD'],
+    // Michigan
+    'madison-heights' => ['id' => '055', 'name' => 'Madison Heights, MI', 'state' => 'MI'],
+    // Minnesota
+    'st-louis-park'   => ['id' => '045', 'name' => 'St. Louis Park, MN', 'state' => 'MN'],
+    // Missouri
+    'brentwood'       => ['id' => '095', 'name' => 'Brentwood (St. Louis), MO', 'state' => 'MO'],
+    // North Carolina
+    'charlotte'       => ['id' => '165', 'name' => 'Charlotte, NC', 'state' => 'NC'],
+    // New Jersey
+    'paterson'        => ['id' => '075', 'name' => 'North Jersey (Paterson), NJ', 'state' => 'NJ'],
+    // New York
+    'westbury'        => ['id' => '065', 'name' => 'Westbury, NY', 'state' => 'NY'],
+    'flushing'        => ['id' => '051', 'name' => 'Flushing, NY', 'state' => 'NY'],
+    'yonkers'         => ['id' => '105', 'name' => 'Yonkers, NY', 'state' => 'NY'],
+    'brooklyn'        => ['id' => '115', 'name' => 'Brooklyn, NY', 'state' => 'NY'],
+    // Ohio
+    'columbus'        => ['id' => '141', 'name' => 'Columbus, OH', 'state' => 'OH'],
+    'mayfield-heights'=> ['id' => '051', 'name' => 'Mayfield Heights, OH', 'state' => 'OH'],
+    'sharonville'     => ['id' => '071', 'name' => 'Sharonville (Cincinnati), OH', 'state' => 'OH'],
+    // Pennsylvania
+    'st-davids'       => ['id' => '061', 'name' => 'St. Davids, PA', 'state' => 'PA'],
+    // Texas
+    'houston'         => ['id' => '155', 'name' => 'Houston, TX', 'state' => 'TX'],
+    'dallas'          => ['id' => '135', 'name' => 'Dallas (Richardson), TX', 'state' => 'TX'],
+    // Virginia
+    'fairfax'         => ['id' => '081', 'name' => 'Fairfax, VA', 'state' => 'VA'],
 ];
 const MC_DEFAULT_STORE = 'westbury';
 
