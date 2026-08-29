@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>techinstock · Micro Center</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    Open Box Hunter
+    <small>microcenter · ny region</small>
+  </div>
+  <div class="stat-bar" id="statbar">
+    <span>store: <b id="stat-store">—</b></span>
+    <span>deals: <b id="stat-count">0</b></span>
+    <span>updated: <b id="stat-time">never</b></span>
+  </div>
+  <a class="home-link" href="/">← home</a>
+  <button class="primary" id="refresh-btn">↻ refresh</button>
+</header>
+
+<section class="controls">
+  <div class="group">
+    <span class="group-label">store</span>
+    <div id="store-tabs" class="group"></div>
+  </div>
+  <div class="group">
+    <span class="group-label">sort</span>
+    <button class="chip active" data-sort="discount_pct">% off</button>
+    <button class="chip" data-sort="discount_dollars">$ saved</button>
+    <button class="chip" data-sort="open_box_price">price ↑</button>
+    <button class="chip" data-sort="-open_box_price">price ↓</button>
+  </div>
+  <div class="group">
+    <span class="group-label">min %</span>
+    <input type="number" id="min-pct" min="0" max="90" step="5" value="0">
+  </div>
+  <div class="group">
+    <span class="group-label">find</span>
+    <input type="search" id="search" placeholder="search by name…">
+  </div>
+</section>
+
+<section class="controls" style="padding-top:12px;padding-bottom:12px;">
+  <div class="group">
+    <span class="group-label">category</span>
+    <div id="cat-chips" class="group"></div>
+  </div>
+</section>
+
+<main>
+  <div class="meta-line">
+    <span><span class="total" id="meta-total">0</span> matching deals</span>
+    <span id="meta-extra"></span>
+  </div>
+  <div id="deals" class="deals"></div>
+</main>
+
+<script src="/static/mc.js"></script>
+</body>
+</html>

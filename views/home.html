@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>techinstock</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="home">
+  <h1>tech<em>in</em>stock</h1>
+  <p class="tagline">Three availability trackers, one homelab box. Self-hosted, no accounts.</p>
+
+  <div class="tracker-grid">
+    <a class="tracker" href="/apple">
+      <span class="num">01 · apple</span>
+      <h2>Apple <em>Stock</em></h2>
+      <p class="blurb">Pickup availability for part numbers you track, across nearby stores.</p>
+      <ul>
+        <li>watchlist by part number</li>
+        <li>multi-store, auto-refresh</li>
+      </ul>
+      <div class="stats"><span>tracked <b id="apple-tracked">—</b></span><span>zip <b id="apple-zip">—</b></span></div>
+    </a>
+
+    <a class="tracker" href="/microcenter">
+      <span class="num">02 · micro center</span>
+      <h2>Open Box <em>Hunter</em></h2>
+      <p class="blurb">Open-box deals across the four NY-area stores, ranked by % off.</p>
+      <ul>
+        <li>per-store inventory</li>
+        <li>regular vs open-box</li>
+      </ul>
+      <div class="stats"><span>cached <b id="mc-count">—</b></span><span>updated <b id="mc-time">—</b></span></div>
+    </a>
+
+    <a class="tracker" href="/bestbuy">
+      <span class="num">03 · best buy</span>
+      <h2>Best Buy <em>Open Box</em></h2>
+      <p class="blurb">Open-box across the catalog via the official developer API.</p>
+      <ul>
+        <li>condition tier sort</li>
+        <li>excellent → fair</li>
+      </ul>
+      <div class="stats"><span>cached <b id="bb-count">—</b></span><span>updated <b id="bb-time">—</b></span></div>
+    </a>
+  </div>
+
+  <div class="foot"><a href="/healthz">/healthz</a> · self-hosted</div>
+</div>
+
+<script>
+  const fmtTime = (ts) => {
+    if (!ts) return "never";
+    const diff = Date.now() / 1000 - ts;
+    if (diff < 60) return "just now";
+    if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+    return new Date(ts * 1000).toLocaleDateString();
+  };
+  fetch("/api/products").then(r => r.json()).then(d => {
+    const total = (d.categories || []).reduce((n, c) => n + (c.products || []).length, 0);
+    document.getElementById("apple-tracked").textContent = total;
+    document.getElementById("apple-zip").textContent = d.default_zip || "—";
+  }).catch(() => {});
+  fetch("/microcenter/api/stores").then(r => r.json()).then(async (d) => {
+    let best = { count: 0, fetched_at: null };
+    await Promise.all(Object.keys(d.stores).map(async (k) => {
+      try {
+        const s = await fetch(`/microcenter/api/deals?store=${k}`).then(r => r.json());
+        if ((s.deals || []).length > best.count) best = { count: s.deals.length, fetched_at: s.fetched_at };
+        else if (best.count === 0 && s.fetched_at && !best.fetched_at) best.fetched_at = s.fetched_at;
+      } catch (e) {}
+    }));
+    document.getElementById("mc-count").textContent = best.count || "0";
+    document.getElementById("mc-time").textContent = fmtTime(best.fetched_at);
+  }).catch(() => {});
+  fetch("/bestbuy/api/status").then(r => r.json()).then(d => {
+    document.getElementById("bb-count").textContent = d.api_key_set ? (d.count || "0") : "no key";
+    document.getElementById("bb-time").textContent = fmtTime(d.fetched_at);
+  }).catch(() => {});
+</script>
+</body>
+</html>

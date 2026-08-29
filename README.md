@@ -1,27 +1,27 @@
 # Tech In Stock
 
 A self-hosted homelab dashboard for tracking tech availability and deals. Three
-trackers, one Docker container:
+trackers, one PHP container:
 
-1. **Apple Stock** — real-time pickup availability for tracked Apple products
-   at stores near a ZIP. Hits the same `fulfillment-messages` endpoint
-   apple.com itself uses on product pages.
-2. **Micro Center Open Box** — open-box deals across the four NY-area
-   stores (Westbury, Flushing, Yonkers, Brooklyn). Compares regular vs.
-   open-box price, sorts by % off, filters by category.
-3. **Best Buy Open Box** — open-box deals across the entire Best Buy
-   catalog via the official developer API. Tier-aware (Excellent-Certified,
-   Excellent, Satisfactory, Fair) so each condition is its own row.
+1. **Apple Stock** — real-time pickup availability for tracked Apple products at
+   stores near a ZIP. Hits the same `pickup-message` endpoint apple.com itself
+   uses on product pages.
+2. **Micro Center Open Box** — open-box deals across the four NY-area stores
+   (Westbury, Flushing, Yonkers, Brooklyn). Compares regular vs. open-box price,
+   sorts by % off, filters by category.
+3. **Best Buy Open Box** — open-box deals across the entire Best Buy catalog via
+   the official developer API. Tier-aware (Excellent-Certified, Excellent,
+   Satisfactory, Fair) so each condition is its own row.
 
 ```
-                        ┌──────────────────────┐
-                        │   /  (landing page)  │
-                        └────┬───────┬────┬────┘
-                             │       │    │
-              ┌──────────────┘       │    └─────────────┐
-              ▼                      ▼                  ▼
-        /apple                 /microcenter         /bestbuy
-        (Apple stock)         (MC Open Box)        (BB Open Box)
+                         ┌──────────────────────┐
+                         │   /  (landing page)  │
+                         └────┬───────┬────┬────┘
+                              │       │    │
+               ┌──────────────┘       │    └─────────────┐
+               ▼                      ▼                  ▼
+         /apple                 /microcenter         /bestbuy
+         (Apple stock)         (MC Open Box)        (BB Open Box)
 ```
 
 ## Quick start
@@ -34,8 +34,9 @@ docker compose build && docker compose up -d
 
 Open `http://<your-host>:8765` for the landing page.
 
-The Apple and Micro Center trackers work immediately. The Best Buy tracker
-needs an API key — see below.
+The Apple and Micro Center trackers work immediately (Micro Center needs a live
+scrape on first load — hit **↻ refresh**). The Best Buy tracker needs an API key
+— see below.
 
 ## Configuration
 
@@ -61,43 +62,47 @@ Change the host port by editing the `ports:` line in `docker-compose.yml`
 4. `docker compose up -d --force-recreate`.
 5. Open `/bestbuy` and hit **↻ refresh**.
 
-Free tier limits: **5 calls/sec, 50,000 calls/day** — way more than the
-tracker uses (one full refresh is roughly 30 calls).
+Free tier limits: **5 calls/sec, 50,000 calls/day**.
 
 ## What each tracker does
 
 ### Apple Stock — `/apple`
 
-Add Apple part numbers (e.g. `MU9D3LL/A`) to a watchlist. The dashboard
-queries Apple's public fulfillment API for every part at once and shows
-which nearby stores have each model in stock for pickup.
+Add Apple part numbers (e.g. `MU9D3LL/A`) to a watchlist. The dashboard queries
+Apple's public fulfillment API for every part at once and shows which nearby
+stores have each model in stock for pickup.
 
 - Default catalog covers Mac mini (M4), Mac Studio (M4 Max), MacBook Air
-  (M4), MacBook Pro (M4 / M4 Pro), AirPods 4, AirPods Pro 2, AirPods Max.
-- Edit via the **+ Add** button or by editing `data/products.json` directly.
+  (M4 / M4 Pro), MacBook Pro (M4 / M4 Pro).
+- Add via the **＋ Add** button or by editing `data/products.json` directly.
 - Auto-refreshes every 5 minutes; press Enter or hit Refresh to force.
-- Find part numbers in the URL after configuring a Mac on apple.com (e.g.
-  `?mtm=MU9D3LL/A`) or by searching `LL/A` in any product page's source.
+- Double-click a name or part number to rename it inline; drag rows to reorder.
 
 ### Micro Center Open Box — `/microcenter`
 
-Scrapes Micro Center's open-box listings for the four NY-area stores and
-shows discount % vs. regular price. Switch between stores with one click.
+Scrapes Micro Center's open-box listings for the four NY-area stores and shows
+discount % vs. regular price. Switch between stores with one click.
 
 - **Stores**: Westbury (065), Flushing (051), Yonkers (105), Brooklyn (115).
-  Edit `STORES` in `app/microcenter.py` to add others.
-- **Categories** auto-discovered from each scrape; chip-filterable with item counts.
+  Edit `MC_STORES` in `lib/microcenter.php` to add others.
+- **Categories** auto-discovered from each scrape; chip-filterable with counts.
 - **Sort by**: % off (default), $ saved, price ↑, price ↓.
-- **Refresh**: triggers a live scrape (~10–25s for a full store);
+- **Refresh**: triggers a live scrape via headless Chromium (~10–30s per store);
   results cached on the volume so reloads are instant.
-- Discount tiers color-coded: green ≥ 30%, amber ≥ 15%, white below.
+- Discount tiers color-coded: green ≥ 30%, amber ≥ 15%, plain below.
+
+> Micro Center front-runs Akamai bot protection, so a plain HTTP GET gets a
+> challenge page. The scraper shells out to `chromium --headless=new --dump-dom`
+> (with a virtual-time budget so the JS fingerprint runs) and parses the
+> rendered DOM with DOMDocument/XPath. If Akamai changes its challenge, the
+> only function to patch is `mc_render_html()` in `lib/microcenter.php`.
 
 ### Best Buy Open Box — `/bestbuy`
 
 Uses Best Buy's official `openBox` endpoint. Each product can have multiple
-condition tiers (each with its own price), and the tracker flattens those
-into individual rows so a Satisfactory listing at 40% off ranks above an
-Excellent listing at 15% off.
+condition tiers (each with its own price), and the tracker flattens those into
+individual rows so a Satisfactory listing at 40% off ranks above an Excellent
+listing at 15% off.
 
 - **Conditions**: Excellent-Certified, Excellent, Satisfactory, Fair —
   filterable.
@@ -107,24 +112,25 @@ Excellent listing at 15% off.
 
 ## Architecture
 
-Everything is one FastAPI app in one container.
+One PHP front controller (`index.php`) replaces FastAPI. No framework, no
+Composer — it runs on the built-in server (`php -S`) on the official `php:8.3-cli`
+image, which ships curl, dom, json and mbstring.
 
 ```
-app/
-├── main.py                  # FastAPI app, mounts the routers below
-├── apple_client.py          # Apple fulfillment-messages client
-├── microcenter.py           # MC scraper + cache
-├── microcenter_routes.py    # /microcenter/* endpoints
-├── bestbuy.py               # BB API client + cache
-├── bestbuy_routes.py        # /bestbuy/* endpoints
-├── products.json            # Default Apple catalog (seeds the volume)
-└── static/
-    ├── home.html            # Unified landing page  ( / )
-    ├── index.html           # Apple dashboard       ( /apple )
-    ├── microcenter.html     # MC dashboard          ( /microcenter )
-    ├── bestbuy.html         # BB dashboard          ( /bestbuy )
-    ├── style.css            # Apple page styles
-    └── app.js               # Apple page logic
+index.php                  # router / front controller
+lib/
+  common.php              # curl HTTP client, JSON helpers, file cache
+  products.php            # Apple catalog load/save + CRUD
+  apple.php               # Apple pickup-availability client
+  microcenter.php         # MC scraper (chromium --dump-dom) + cache
+  bestbuy.php             # BB API client + cache
+views/                    # HTML shells: home, apple, microcenter, bestbuy
+static/
+  style.css               # shared, calm design system
+  app.js                  # Apple dashboard logic
+  mc.js                   # Micro Center dashboard logic
+  bb.js                   # Best Buy dashboard logic
+products.json             # Default Apple catalog (seeds the volume)
 ```
 
 Caches live on the mounted volume next to `products.json`:
@@ -132,6 +138,7 @@ Caches live on the mounted volume next to `products.json`:
 ```
 data/
 ├── products.json            # Apple catalog (editable)
+├── apple_cache.json         # last Apple check per zip (30s TTL)
 ├── microcenter_cache.json   # last MC scrape per store
 └── bestbuy_cache.json       # last BB API snapshot
 ```
@@ -171,20 +178,25 @@ data/
 ## Running without Docker
 
 ```bash
-pip install -r requirements.txt
+# needs php-cli >= 8.1 and chromium installed as `chromium`
 export DEFAULT_ZIP=11793
 export BESTBUY_API_KEY=your-key-here   # optional
-uvicorn app.main:app --reload --port 8000
+php -S 0.0.0.0:8000 index.php
 ```
+
+> The built-in server is single-threaded, so a Micro Center or Best Buy refresh
+> blocks other requests until it finishes (10–30s). That's fine for a homelab
+> single-user box. For multi-user use, put it behind PHP-FPM + nginx.
 
 ## Notes
 
-- The Apple tracker hits an undocumented `fulfillment-messages` endpoint
-  that's been stable for years — but it's not contractual. Parser lives
-  in `app/apple_client.py`.
+- The Apple tracker hits an undocumented `pickup-message` endpoint that's been
+  stable for years — but it's not contractual. Parser lives in `lib/apple.php`.
+  It already handles the 2025 endpoint move (`/shop/retail/pickup-message`) and
+  both the old and new response shapes.
 - The Micro Center scraper uses tolerant fallback selectors so minor HTML
-  tweaks won't break it. If a major redesign hits, the only function to
-  patch is `_extract_card()` in `app/microcenter.py`.
+  changes won't break it. The one function to patch if Akamai changes its
+  challenge is `mc_render_html()` in `lib/microcenter.php`.
 - The Best Buy tracker uses the *official* Open Box API, so it's the most
-  reliable of the three. If a request returns 403 it almost always means
-  the API key is wrong or expired.
+  reliable of the three. If a request returns 403 it almost always means the API
+  key is wrong or expired.

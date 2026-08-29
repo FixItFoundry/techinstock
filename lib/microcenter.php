@@ -1,0 +1,326 @@
+<?php
+// Micro Center open-box scraper + cache.
+//
+// Micro Center front-runs Akamai bot protection, so a plain HTTP GET gets a
+// challenge page. The original Python used nodriver (headless Chromium) and
+// waited for the JS fingerprint to finish before reading the DOM. The faithful
+// PHP equivalent is to shell out to headless Chromium with --dump-dom and a
+// virtual-time budget, then parse the rendered HTML with DOMDocument/XPath.
+//
+// Parsing is intentionally tolerant: every selector falls back to a broader
+// sibling before giving up on a card, so minor markup tweaks won't kill the feed.
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/common.php';
+
+const MC_STORES = [
+    'westbury' => ['id' => '065', 'name' => 'Westbury, NY'],
+    'flushing' => ['id' => '051', 'name' => 'Flushing, NY'],
+    'yonkers'  => ['id' => '105', 'name' => 'Yonkers, NY'],
+    'brooklyn' => ['id' => '115', 'name' => 'Brooklyn, NY'],
+];
+const MC_DEFAULT_STORE = 'westbury';
+
+const MC_OPEN_BOX_N = '4294966937';
+const MC_SEARCH_URL = 'https://www.microcenter.com/search/search_results.aspx';
+const MC_PAGE_SIZE = 96;
+const MC_MAX_PAGES = 20;
+const MC_REQUEST_TIMEOUT = 25.0;
+
+const MC_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+
+function mc_cache_file(): string {
+    return data_dir() . '/microcenter_cache.json';
+}
+
+// ---------------------------------------------------------------------------
+// Chromium render
+// ---------------------------------------------------------------------------
+
+function mc_render_html(string $url): string {
+    $ua = escapeshellarg(MC_USER_AGENT);
+    $u = escapeshellarg($url);
+    $cmd = sprintf(
+        'chromium --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage '
+        . '--disable-software-rasterizer --lang=en-US --user-agent=%s '
+        . '--virtual-time-budget=12000 --timeout=20000 --dump-dom %s 2>/dev/null',
+        $ua,
+        $u
+    );
+    $out = shell_exec($cmd);
+    return $out === null ? '' : $out;
+}
+
+// ---------------------------------------------------------------------------
+// HTML parsing helpers (DOMXPath)
+// ---------------------------------------------------------------------------
+
+function mc_class_pred(string $class): string {
+    return sprintf("contains(concat(' ', normalize-space(@class), ' '), ' %s ')", $class);
+}
+
+function mc_xpath_one(DOMNode $ctx, string $expr): ?DOMElement {
+    $xp = new DOMXPath($ctx->ownerDocument);
+    $n = $xp->query($expr, $ctx);
+    if ($n === false || $n->length === 0) {
+        return null;
+    }
+    $first = $n->item(0);
+    return $first instanceof DOMElement ? $first : null;
+}
+
+function mc_first_text(DOMNode $ctx, array $exprs): ?string {
+    foreach ($exprs as $e) {
+        $el = mc_xpath_one($ctx, $e);
+        if ($el) {
+            $t = trim(preg_replace('/\s+/', ' ', $el->textContent));
+            if ($t !== '') {
+                return $t;
+            }
+        }
+    }
+    return null;
+}
+
+function mc_attr(DOMElement $el, string $name): string {
+    return $el->hasAttribute($name) ? (string) $el->getAttribute($name) : '';
+}
+
+function mc_parse_price(?string $text): ?float {
+    if ($text === null || $text === '') {
+        return null;
+    }
+    if (preg_match('/\$?\s*([\d,]+\.\d{2}|\d+)/', $text, $m)) {
+        return (float) str_replace(',', '', $m[1]);
+    }
+    return null;
+}
+
+// ---------------------------------------------------------------------------
+// Card extraction
+// ---------------------------------------------------------------------------
+
+function mc_extract_card(DOMElement $card): ?array {
+    // Name + product URL
+    $a = mc_xpath_one($card, './/a[' . mc_class_pred('productClickItemV2') . ']')
+        ?? mc_xpath_one($card, './/h2/a')
+        ?? mc_xpath_one($card, './/a[contains(@href, \'/product/\')]');
+    if (!$a) {
+        return null;
+    }
+    $name = trim(preg_replace('/\s+/', ' ', $a->textContent));
+    $href = mc_attr($a, 'href');
+    $url = str_starts_with($href, 'http') ? $href : 'https://www.microcenter.com' . $href;
+
+    // SKU
+    $sku = mc_attr($card, 'data-id') ?: mc_attr($card, 'data-sku');
+    if (!$sku) {
+        $inner = mc_xpath_one($card, './/*[@data-id]') ?? mc_xpath_one($card, './/*[@data-sku]');
+        if ($inner) {
+            $sku = mc_attr($inner, 'data-id') ?: mc_attr($inner, 'data-sku');
+        }
+    }
+    if (!$sku) {
+        if (preg_match('#/product/(\d+)#', $url, $m)) {
+            $sku = $m[1];
+        } else {
+            $sku = $url;
+        }
+    }
+
+    // Image
+    $img = mc_xpath_one($card, './/img');
+    $image = null;
+    if ($img) {
+        $src = mc_attr($img, 'src') ?: mc_attr($img, 'data-src') ?: mc_attr($img, 'data-original');
+        if ($src !== '') {
+            $image = str_starts_with($src, '//') ? 'https:' . $src : $src;
+        }
+    }
+
+    // Open-box price
+    $ob_text = mc_first_text($card, [
+        './/*[' . mc_class_pred('price-wrapper') . ']//*[@itemprop=\'price\']',
+        './/*[@data-price]',
+        './/*[' . mc_class_pred('product_price') . ']',
+        './/*[' . mc_class_pred('price') . ']',
+    ]);
+    $open_box_price = mc_parse_price($ob_text);
+
+    // Regular price
+    $reg_text = mc_first_text($card, [
+        './/*[' . mc_class_pred('comp-price') . ']',
+        './/*[' . mc_class_pred('compare-price') . ']',
+        './/*[' . mc_class_pred('strikethrough') . ']',
+        './/*[' . mc_class_pred('was-price') . ']',
+        './/del',
+        './/s',
+    ]);
+    $regular_price = mc_parse_price($reg_text);
+    if ($regular_price === null) {
+        $whole = trim(preg_replace('/\s+/', ' ', $card->textContent));
+        if (preg_match('/(?:Reg(?:ular)?\.?\s*Price\.?|Reg\.)\s*\$?([\d,]+\.\d{2})/i', $whole, $m)) {
+            $regular_price = mc_parse_price($m[1]);
+        }
+    }
+
+    if ($open_box_price === null || $regular_price === null || $regular_price <= 0) {
+        return null;
+    }
+    if ($open_box_price >= $regular_price) {
+        return null; // not actually a discount
+    }
+
+    $condition = mc_first_text($card, [
+        './/*[' . mc_class_pred('condition') . ']',
+        './/*[' . mc_class_pred('openBoxCondition') . ']',
+        './/*[' . mc_class_pred('product-condition') . ']',
+    ]) ?: 'Open Box';
+
+    $category = mc_attr($card, 'data-category');
+    if (!$category) {
+        $cinner = mc_xpath_one($card, './/*[@data-category]');
+        if ($cinner) {
+            $category = mc_attr($cinner, 'data-category');
+        }
+    }
+    if (!$category) {
+        $category = mc_first_text($card, [
+            './/*[' . mc_class_pred('category') . ']',
+            './/*[' . mc_class_pred('breadcrumb') . ']',
+        ]);
+    }
+    $category = $category ? trim(ucwords(strtolower($category))) : 'Other';
+    if ($category === '') {
+        $category = 'Other';
+    }
+
+    $discount_dollars = round($regular_price - $open_box_price, 2);
+    $discount_pct = round($discount_dollars / $regular_price * 100, 1);
+
+    return [
+        'sku' => (string) $sku,
+        'name' => $name,
+        'url' => $url,
+        'image' => $image,
+        'category' => $category,
+        'condition' => $condition,
+        'regular_price' => $regular_price,
+        'open_box_price' => $open_box_price,
+        'discount_dollars' => $discount_dollars,
+        'discount_pct' => $discount_pct,
+    ];
+}
+
+function mc_parse_listing(string $html): array {
+    $doc = new DOMDocument();
+    libxml_use_internal_errors(true);
+    $doc->loadHTML('<?xml encoding="utf-8"?>' . $html, LIBXML_NOERROR | LIBXML_NOWARNING);
+    libxml_clear_errors();
+
+    $xp = new DOMXPath($doc);
+    $expr = '//li[' . mc_class_pred('product_wrapper') . ']'
+        . ' | //article[' . mc_class_pred('product_wrapper') . ']'
+        . ' | //*[' . mc_class_pred('product_wrapper') . ']'
+        . ' | //li[@data-id]';
+    $nodes = $xp->query($expr);
+    $out = [];
+    if ($nodes) {
+        foreach ($nodes as $c) {
+            if (!$c instanceof DOMElement) {
+                continue;
+            }
+            try {
+                $d = mc_extract_card($c);
+                if ($d) {
+                    $out[] = $d;
+                }
+            } catch (Throwable $e) {
+                // one bad card shouldn't kill the page
+            }
+        }
+    }
+    return $out;
+}
+
+// ---------------------------------------------------------------------------
+// Fetch + cache
+// ---------------------------------------------------------------------------
+
+function mc_fetch_store(string $store_key): array {
+    if (!isset(MC_STORES[$store_key])) {
+        throw new InvalidArgumentException("unknown store '$store_key'");
+    }
+    $meta = MC_STORES[$store_key];
+    $snap = [
+        'store_key' => $store_key,
+        'store_id' => $meta['id'],
+        'store_name' => $meta['name'],
+        'fetched_at' => time(),
+        'deals' => [],
+        'error' => null,
+    ];
+
+    $seen = [];
+    $page = 1;
+    try {
+        for (; $page <= MC_MAX_PAGES; $page++) {
+            $params = [
+                'N' => MC_OPEN_BOX_N,
+                'storeid' => $meta['id'],
+                'myStore' => 'true',
+                'pagecount' => (string) MC_PAGE_SIZE,
+                'currentpage' => (string) $page,
+                'sortby' => 'match',
+            ];
+            $url = MC_SEARCH_URL . '?' . http_build_query($params);
+            $html = mc_render_html($url);
+            if ($html === '') {
+                $snap['error'] = "page $page: chromium returned no HTML";
+                break;
+            }
+            $page_deals = mc_parse_listing($html);
+
+            $new = 0;
+            foreach ($page_deals as $d) {
+                $key = $d['sku'] . '|' . $d['condition'];
+                if (!isset($seen[$key])) {
+                    $seen[$key] = true;
+                    $snap['deals'][] = $d;
+                    $new++;
+                }
+            }
+            if ($new === 0) {
+                break;
+            }
+            // jitter to look less bot-like
+            usleep((int) ((0.6 + mt_rand() / mt_getrandmax() * 0.8) * 1_000_000));
+        }
+    } catch (Throwable $e) {
+        $snap['error'] = "page $page: " . $e->getMessage();
+    }
+
+    return $snap;
+}
+
+function mc_load_cache(): array {
+    return cache_read(mc_cache_file()) ?? [];
+}
+
+function mc_save_cache(array $cache): void {
+    cache_write(mc_cache_file(), $cache);
+}
+
+function mc_refresh(string $store_key): array {
+    $snap = mc_fetch_store($store_key);
+    $cache = mc_load_cache();
+    $cache[$store_key] = $snap;
+    mc_save_cache($cache);
+    return $snap;
+}
+
+function mc_get_cached(string $store_key): ?array {
+    $cache = mc_load_cache();
+    return $cache[$store_key] ?? null;
+}

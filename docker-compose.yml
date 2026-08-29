@@ -13,7 +13,7 @@ services:
       PRODUCTS_FILE: "/data/products.json"
       # Get a free key at https://developer.bestbuy.com — required for the
       # Best Buy tracker. Leave blank to disable that tracker (the page will
-      # show a clear "set this and rebuild" banner).
+      # show a clear "set this and recreate" banner).
       BESTBUY_API_KEY: ""
     volumes:
       # Persist catalogs + scrape caches across rebuilds
