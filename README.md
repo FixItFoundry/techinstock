@@ -1,6 +1,6 @@
 # Tech in Stock
 
-A self-hosted dashboard for tracking tech availability, clearance, and open-box deals across **Apple**, **Micro Center**, and **Best Buy**. Built with a lightweight PHP 8.3 container and an urban cyberpunk aesthetic.
+A self-hosted dashboard for tracking tech availability, clearance, and open-box deals across **Apple**, **Micro Center**, and **Best Buy**. Built with a lightweight PHP 8.3 container.
 
 ```
                          ┌──────────────────────┐
