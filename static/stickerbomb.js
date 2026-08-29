@@ -13,7 +13,7 @@
   // Primary user-requested brands (weighted heavily so they appear frequently across the wall)
   const PRIMARY_STICKERS = [
     { id: 'apple', name: 'Apple', file: 'apple.svg', w: 65, h: 65 },
-    { id: 'microcenter', name: 'Micro Center', file: 'microcenter.svg', w: 120, h: 26 },
+    { id: 'microcenter', name: 'Micro Center', file: 'microcenter.svg', w: 95, h: 46 },
     { id: 'bestbuy', name: 'Best Buy', file: 'bestbuy.svg', w: 90, h: 52 },
     { id: 'asus', name: 'ASUS', file: 'asus.svg', w: 95, h: 36 },
     { id: 'asusrog', name: 'ASUS ROG', file: 'asusrog.svg', w: 65, h: 65 },

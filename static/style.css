@@ -190,7 +190,7 @@ a {
 }
 
 .sticker-microcenter .sticker-diecut-wrap {
-  background: #ffffff !important;
+  background: #002D62 !important;
   border-color: #ffffff !important;
 }
 
@@ -411,9 +411,9 @@ a {
 }
 
 .sticker-apple:hover .badge-apple-tag {
-  background: rgba(41, 151, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   color: #ffffff;
-  border-color: #2997ff;
+  border-color: #ffffff;
 }
 
 .sticker-microcenter:hover .badge-mc-tag {
@@ -473,9 +473,9 @@ a {
   border-color: rgba(255, 255, 255, 0.16);
 }
 .sticker-apple:hover {
-  border-color: #2997ff;
+  border-color: #ffffff;
   box-shadow: 
-    0 8px 24px rgba(41, 151, 255, 0.35),
+    0 8px 28px rgba(255, 255, 255, 0.4),
     0 16px 40px rgba(0, 0, 0, 0.65);
 }
 .sticker-apple h2 em {
@@ -555,7 +555,7 @@ a {
   transition: background 0.15s, color 0.15s;
 }
 
-.sticker-apple:hover .action-btn-pill { background: #2997ff; color: #fff; }
+.sticker-apple:hover .action-btn-pill { background: #ffffff; color: #000; }
 .sticker-microcenter:hover .action-btn-pill { background: #0071dc; color: #fff; }
 .sticker-bestbuy:hover .action-btn-pill { background: #ffe000; color: #000; }
 
