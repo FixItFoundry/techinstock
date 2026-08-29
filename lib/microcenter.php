@@ -223,9 +223,19 @@ function mc_extract_card(DOMElement $card): ?array {
     $img = mc_xpath_one($card, './/img');
     $image = null;
     if ($img) {
-        $src = mc_attr($img, 'src') ?: mc_attr($img, 'data-src') ?: mc_attr($img, 'data-original');
+        $src = mc_attr($img, 'src') 
+            ?: mc_attr($img, 'data-src') 
+            ?: mc_attr($img, 'data-original') 
+            ?: mc_attr($img, 'data-lazy') 
+            ?: mc_attr($img, 'data-image');
         if ($src !== '') {
-            $image = str_starts_with($src, '//') ? 'https:' . $src : $src;
+            if (str_starts_with($src, '//')) {
+                $image = 'https:' . $src;
+            } elseif (str_starts_with($src, '/')) {
+                $image = 'https://www.microcenter.com' . $src;
+            } else {
+                $image = $src;
+            }
         }
     }
 
@@ -291,8 +301,10 @@ function mc_extract_card(DOMElement $card): ?array {
     return [
         'sku' => (string) $sku,
         'name' => $name,
+        'title' => $name,
         'url' => $url,
         'image' => $image,
+        'image_url' => $image,
         'category' => $category,
         'condition' => $condition,
         'regular_price' => $regular_price,

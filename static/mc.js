@@ -175,7 +175,7 @@ function render() {
   if (state.minPct > 0) deals = deals.filter(d => d.discount_pct >= state.minPct);
   if (state.search) {
     const q = state.search.toLowerCase();
-    deals = deals.filter(d => (d.title + " " + d.category + " " + d.sku).toLowerCase().includes(q));
+    deals = deals.filter(d => ((d.name || d.title || "") + " " + (d.category || "") + " " + (d.sku || "")).toLowerCase().includes(q));
   }
 
   const metaTotal = $("#meta-total");
@@ -191,8 +191,10 @@ function render() {
   }
 
   list.innerHTML = deals.map(d => {
-    const imgHtml = d.image_url
-      ? `<img src="${escapeHtml(d.image_url)}" alt="${escapeHtml(d.title)}" loading="lazy" onerror="this.onerror=null; this.src='/static/microcenter-logo.svg'; this.style.padding='10px';">`
+    const title = d.name || d.title || "Micro Center Item";
+    const imgUrl = d.image || d.image_url || "";
+    const imgHtml = imgUrl
+      ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.onerror=null; this.src='/static/microcenter-logo.svg'; this.style.padding='10px';">`
       : `<img src="/static/microcenter-logo.svg" alt="Micro Center" style="padding:10px;">`;
     
     const conditionText = d.condition || 'Open Box';
@@ -201,11 +203,11 @@ function render() {
       <a class="row" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">
         <div class="img">${imgHtml}</div>
         <div>
-          <div class="name">${escapeHtml(d.title)}</div>
+          <div class="name">${escapeHtml(title)}</div>
           <div class="meta">
             <span class="cond">${escapeHtml(conditionText)}</span>
-            <span class="cat">${escapeHtml(d.category)}</span>
-            <span>SKU ${escapeHtml(d.sku)}</span>
+            <span class="cat">${escapeHtml(d.category || "Other")}</span>
+            <span>SKU ${escapeHtml(d.sku || "")}</span>
           </div>
         </div>
         <div class="price">
