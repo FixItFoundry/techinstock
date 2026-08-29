@@ -22,7 +22,9 @@ const MC_STORES = [
 ];
 const MC_DEFAULT_STORE = 'westbury';
 
-const MC_OPEN_BOX_N = '4294966937';
+// "Shop All Open Box Deals" — every category. (The old 4294966937 was the
+// Graphics Cards open-box node, which is why the scraper only saw GPUs.)
+const MC_OPEN_BOX_FQ = 'Valuable Links:Open Box';
 const MC_SEARCH_URL = 'https://www.microcenter.com/search/search_results.aspx';
 const MC_PAGE_SIZE = 96;
 const MC_MAX_PAGES = 20;
@@ -150,7 +152,10 @@ function mc_extract_card(DOMElement $card): ?array {
     if (!$a) {
         return null;
     }
-    $name = trim(preg_replace('/\s+/', ' ', $a->textContent));
+    $name = mc_attr($a, 'data-name');
+    if ($name === '') {
+        $name = trim(preg_replace('/\s+/', ' ', $a->textContent));
+    }
     $href = mc_attr($a, 'href');
     $url = str_starts_with($href, 'http') ? $href : 'https://www.microcenter.com' . $href;
 
@@ -180,32 +185,29 @@ function mc_extract_card(DOMElement $card): ?array {
         }
     }
 
-    // Open-box price — Micro Center shows it as the `itemprop="price"` span
-    // (text like "Our price $14,399.99"), not in a `@content` attribute.
-    $ob_text = mc_first_text($card, [
-        './/*[@itemprop=\'price\']',
-        './/*[' . mc_class_pred('price-wrapper') . ']//*[@itemprop=\'price\']',
-        './/*[' . mc_class_pred('product_price') . ']',
-        './/*[' . mc_class_pred('price') . ']',
+    // Open-box vs regular price. Micro Center uses two different markups:
+    //  - Category open-box page: `itemprop="price"` is the OPEN BOX price
+    //    ("Our price $X"); the original/new price is in a <strike> ("Original price $Y").
+    //  - General "Shop All Open Box" page: `itemprop="price"` is the NEW/REGULAR
+    //    price ("Regular price $Y"); the OPEN BOX price sits in a
+    //    `.price-label.compareTo` ("Open Box From $X").
+    $itemprop_txt = mc_first_text($card, ['.//*[@itemprop=\'price\']']);
+    $strike_txt   = mc_first_text($card, ['.//strike', './/del', './/s']);
+    $ob_label_txt = mc_first_text($card, [
+        './/*[' . mc_class_pred('compareTo') . ']',
+        './/*[' . mc_class_pred('price-label') . ']',
     ]);
-    $open_box_price = mc_parse_price($ob_text);
 
-    // Regular (new) price — shown struck through as the "Original price".
-    $reg_text = mc_first_text($card, [
-        './/strike',
-        './/del',
-        './/s',
-        './/*[' . mc_class_pred('comp-price') . ']',
-        './/*[' . mc_class_pred('compare-price') . ']',
-        './/*[' . mc_class_pred('strikethrough') . ']',
-        './/*[' . mc_class_pred('was-price') . ']',
-    ]);
-    $regular_price = mc_parse_price($reg_text);
-    if ($regular_price === null) {
-        $whole = trim(preg_replace('/\s+/', ' ', $card->textContent));
-        if (preg_match('/(?:Reg(?:ular)?\.?\s*Price\.?|Reg\.)\s*\$?([\d,]+\.\d{2})/i', $whole, $m)) {
-            $regular_price = mc_parse_price($m[1]);
-        }
+    $open_box_price = null;
+    $regular_price = null;
+    if ($ob_label_txt !== null) {
+        // Layout B: compareTo = open-box price, itemprop = regular price.
+        $regular_price = mc_parse_price($itemprop_txt);
+        $open_box_price = mc_parse_price($ob_label_txt);
+    } elseif ($strike_txt !== null) {
+        // Layout A: itemprop = open-box price, strike = regular price.
+        $open_box_price = mc_parse_price($itemprop_txt);
+        $regular_price = mc_parse_price($strike_txt);
     }
 
     if ($open_box_price === null || $regular_price === null || $regular_price <= 0) {
@@ -310,7 +312,7 @@ function mc_fetch_store(string $store_key): array {
     try {
         for (; $page <= MC_MAX_PAGES; $page++) {
             $params = [
-                'N' => MC_OPEN_BOX_N,
+                'fq' => MC_OPEN_BOX_FQ,
                 'storeid' => $meta['id'],
                 'myStore' => 'true',
                 'pagecount' => (string) MC_PAGE_SIZE,

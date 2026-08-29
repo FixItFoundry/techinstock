@@ -83,8 +83,9 @@ stores have each model in stock for pickup.
 
 ### Micro Center Open Box — `/microcenter`
 
-Scrapes Micro Center's open-box listings for the four NY-area stores and shows
-discount % vs. regular price. Switch between stores with one click.
+Scrapes **all** Micro Center open-box listings (every category) for the four
+NY-area stores and shows discount % vs. regular price. Switch between stores
+and filter by category with the chips.
 
 - **Stores**: Westbury (065), Flushing (051), Yonkers (105), Brooklyn (115).
   Edit `MC_STORES` in `lib/microcenter.php` to add others.
