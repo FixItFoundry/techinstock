@@ -400,23 +400,32 @@ a {
   text-transform: uppercase;
 }
 
-.badge-apple-tag {
-  background: #ffffff;
-  color: #000000;
-  box-shadow: 0 2px 0 #000;
-}
-
-.badge-mc-tag {
-  background: #000000;
-  color: #ffffff;
-  border: 1px solid #ffffff;
-  box-shadow: 0 2px 0 #000;
-}
-
+.badge-apple-tag,
+.badge-mc-tag,
 .badge-bb-tag {
-  background: #ffe000;
-  color: #000000;
-  box-shadow: 0 2px 0 #000;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e4e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.sticker-apple:hover .badge-apple-tag {
+  background: rgba(41, 151, 255, 0.2);
+  color: #ffffff;
+  border-color: #2997ff;
+}
+
+.sticker-microcenter:hover .badge-mc-tag {
+  background: rgba(0, 113, 220, 0.2);
+  color: #ffffff;
+  border-color: #0071dc;
+}
+
+.sticker-bestbuy:hover .badge-bb-tag {
+  background: rgba(255, 224, 0, 0.2);
+  color: #ffe000;
+  border-color: #ffe000;
 }
 
 .sticker-card h2 {
@@ -461,7 +470,13 @@ a {
 /* Sticker Card Brand Specific Flavors */
 .sticker-apple {
   background: linear-gradient(160deg, #181c26 0%, #11141c 100%);
-  border-color: #e4e7eb;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+.sticker-apple:hover {
+  border-color: #2997ff;
+  box-shadow: 
+    0 8px 24px rgba(41, 151, 255, 0.35),
+    0 16px 40px rgba(0, 0, 0, 0.65);
 }
 .sticker-apple h2 em {
   font-style: normal;
@@ -470,8 +485,14 @@ a {
 .sticker-apple .tracker-features li::before { color: #2997ff; }
 
 .sticker-microcenter {
-  background: linear-gradient(160deg, #121212 0%, #080808 100%);
-  border-color: #ffffff;
+  background: linear-gradient(160deg, #181c26 0%, #11141c 100%);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+.sticker-microcenter:hover {
+  border-color: #0071dc;
+  box-shadow: 
+    0 8px 24px rgba(0, 113, 220, 0.35),
+    0 16px 40px rgba(0, 0, 0, 0.65);
 }
 .sticker-microcenter h2 em {
   font-style: normal;
@@ -480,8 +501,14 @@ a {
 .sticker-microcenter .tracker-features li::before { color: #0071dc; }
 
 .sticker-bestbuy {
-  background: linear-gradient(160deg, #0f1d38 0%, #0a1324 100%);
+  background: linear-gradient(160deg, #181c26 0%, #11141c 100%);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+.sticker-bestbuy:hover {
   border-color: #ffe000;
+  box-shadow: 
+    0 8px 24px rgba(255, 224, 0, 0.35),
+    0 16px 40px rgba(0, 0, 0, 0.65);
 }
 .sticker-bestbuy h2 em {
   font-style: normal;
