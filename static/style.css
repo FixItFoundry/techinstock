@@ -1310,6 +1310,14 @@ a {
   display: grid;
   place-items: center;
   overflow: hidden;
+  flex-shrink: 0;
+}
+
+.page-microcenter .row .img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .page-microcenter .row .name {

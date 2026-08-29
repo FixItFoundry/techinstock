@@ -165,7 +165,8 @@ function renderCategoryChips() {
 
 function render() {
   const s = state.snapshot;
-  $("#stat-store").textContent = s?.store_name || state.stores[state.storeKey]?.name || "—";
+  const storeName = s?.store_name || state.stores[state.storeKey]?.name || "—";
+  $("#stat-store").textContent = storeName;
   $("#stat-count").textContent = (s?.deals || []).length;
   $("#stat-time").textContent = fmtTime(s?.fetched_at);
 
@@ -177,36 +178,45 @@ function render() {
     deals = deals.filter(d => (d.title + " " + d.category + " " + d.sku).toLowerCase().includes(q));
   }
 
+  const metaTotal = $("#meta-total");
+  if (metaTotal) metaTotal.textContent = deals.length;
+
   const [key, dir] = state.sort.startsWith("-") ? [state.sort.slice(1), -1] : [state.sort, 1];
   deals.sort((a, b) => (Number(a[key]) - Number(b[key])) * dir);
 
   const list = $("#deals");
   if (!deals.length) {
-    list.innerHTML = `<div class="empty"><div class="big">No deals found</div>Try adjusting filters or hitting ↻ Fetch Live Scrape.</div>`;
+    list.innerHTML = `<div class="empty"><div class="big">No deals found for ${escapeHtml(storeName)}</div>Try adjusting filters or clicking ↻ Fetch Live Scrape to run live collection.</div>`;
     return;
   }
 
   list.innerHTML = deals.map(d => {
-    const img = d.image_url ? `<img src="${escapeHtml(d.image_url)}" alt="" loading="lazy" onerror="this.remove()">` : "";
+    const imgHtml = d.image_url
+      ? `<img src="${escapeHtml(d.image_url)}" alt="${escapeHtml(d.title)}" loading="lazy" onerror="this.onerror=null; this.src='/static/microcenter-logo.svg'; this.style.padding='10px';">`
+      : `<img src="/static/microcenter-logo.svg" alt="Micro Center" style="padding:10px;">`;
+    
+    const conditionText = d.condition || 'Open Box';
+
     return `
-      <a class="deal-row" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">
-        <div class="thumb">${img}</div>
-        <span class="info">
-          <div class="title">${escapeHtml(d.title)}</div>
+      <a class="row" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">
+        <div class="img">${imgHtml}</div>
+        <div>
+          <div class="name">${escapeHtml(d.title)}</div>
           <div class="meta">
+            <span class="cond">${escapeHtml(conditionText)}</span>
             <span class="cat">${escapeHtml(d.category)}</span>
             <span>SKU ${escapeHtml(d.sku)}</span>
           </div>
-        </span>
-        <span class="price">
+        </div>
+        <div class="price">
           <div class="reg">${fmt$(d.regular_price)}</div>
           <div class="ob">${fmt$(d.open_box_price)}</div>
-        </span>
-        <span class="save">
+        </div>
+        <div class="save">
           <div class="d">−${fmt$(d.discount_dollars)}</div>
           <div class="pct ${tierFor(d.discount_pct)}">${fmtPct(d.discount_pct)}</div>
-        </span>
-        <span class="arrow">→</span>
+        </div>
+        <div class="arrow">→</div>
       </a>`;
   }).join("");
 }
