@@ -6,6 +6,8 @@ services:
     restart: unless-stopped
     ports:
       - "8765:80"
+    depends_on:
+      - flaresolverr
     environment:
       # Default ZIP shown in the Apple tracker on first load
       DEFAULT_ZIP: "11793"
@@ -15,8 +17,24 @@ services:
       # Best Buy tracker. Leave blank to disable that tracker (the page will
       # show a clear "set this and recreate" banner).
       BESTBUY_API_KEY: ""
+      # Cloudflare-solving sidecar for the Micro Center scraper.
+      FLARESOLVERR_URL: "http://flaresolverr:8191"
     volumes:
       # Persist catalogs + scrape caches across rebuilds.
       # :Z relabels the mount so the container (www-data) can write it under
       # rootless runtimes (podman) with SELinux enabled.
       - ./data:/data:Z
+
+  # FlareSolverr solves Cloudflare's "Just a moment…" Turnstile challenge and
+  # returns the rendered HTML + clearance cookie. The Micro Center scraper
+  # POSTs each page URL to its /v1 API. It keeps a browser session, so after
+  # the first solve, subsequent store/page fetches are fast.
+  flaresolverr:
+    image: flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=info
+    # Optional: expose for debugging
+    # ports:
+    #   - "8191:8191"

@@ -45,6 +45,7 @@ scrape on first load — hit **↻ refresh**). The Best Buy tracker needs an API
 | `DEFAULT_ZIP`     | `11793`               | ZIP shown in the Apple UI on first load                               |
 | `PRODUCTS_FILE`   | `/data/products.json` | Editable Apple catalog; mount a volume to persist                     |
 | `BESTBUY_API_KEY` | *(unset)*             | Free key from [developer.bestbuy.com](https://developer.bestbuy.com)  |
+| `FLARESOLVERR_URL`| `http://flaresolverr:8191` | Cloudflare solver sidecar for the Micro Center scraper (**required** for MC) |
 
 Change the host port by editing the `ports:` line in `docker-compose.yml`
 (default `8765:80`).
@@ -89,15 +90,18 @@ discount % vs. regular price. Switch between stores with one click.
   Edit `MC_STORES` in `lib/microcenter.php` to add others.
 - **Categories** auto-discovered from each scrape; chip-filterable with counts.
 - **Sort by**: % off (default), $ saved, price ↑, price ↓.
-- **Refresh**: triggers a live scrape via headless Chromium (~10–30s per store);
-  results cached on the volume so reloads are instant.
+- **Refresh**: triggers a live scrape via the FlareSolverr sidecar (~10–30s per
+  store for the first Cloudflare solve, then faster as the session cookie is
+  reused); results cached on the volume so reloads are instant.
 - Discount tiers color-coded: green ≥ 30%, amber ≥ 15%, plain below.
 
-> Micro Center front-runs Akamai bot protection, so a plain HTTP GET gets a
-> challenge page. The scraper shells out to `chromium --headless=new --dump-dom`
-> (with a virtual-time budget so the JS fingerprint runs) and parses the
-> rendered DOM with DOMDocument/XPath. If Akamai changes its challenge, the
-> only function to patch is `mc_render_html()` in `lib/microcenter.php`.
+> Micro Center is protected by **Cloudflare Turnstile** ("Just a moment…"), not
+> Akamai. A plain HTTP GET — and even headless Chromium alone — gets the
+> challenge page, not the listing. The scraper therefore proxies every page
+> through **FlareSolverr** (`mc_render_via_solver()` in `lib/microcenter.php`),
+> which returns the solved, rendered HTML. Chromium `--dump-dom` is kept only as
+> a last-resort fallback when FlareSolverr is unavailable. To point at a
+> different solver, set `FLARESOLVERR_URL` (default `http://flaresolverr:8191`).
 
 ### Best Buy Open Box — `/bestbuy`
 
@@ -127,7 +131,7 @@ lib/
   common.php              # curl HTTP client, JSON helpers, file cache
   products.php            # Apple catalog load/save + CRUD
   apple.php               # Apple pickup-availability client
-  microcenter.php         # MC scraper (chromium --dump-dom) + cache
+  microcenter.php         # MC scraper (FlareSolverr + chromium fallback) + cache
   bestbuy.php             # BB API client + cache
 views/                    # HTML shells: home, apple, microcenter, bestbuy
 static/

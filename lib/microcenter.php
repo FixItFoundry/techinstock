@@ -35,10 +35,43 @@ function mc_cache_file(): string {
 }
 
 // ---------------------------------------------------------------------------
-// Chromium render
+// Render: solve Cloudflare via FlareSolverr, fall back to headless Chromium
 // ---------------------------------------------------------------------------
 
-function mc_render_html(string $url): string {
+function mc_solver_url(): string {
+    return env('FLARESOLVERR_URL', 'http://flaresolverr:8191');
+}
+
+// Ask FlareSolverr to fetch + solve the Cloudflare "Just a moment…" challenge.
+// Returns the solved HTML, or '' if it couldn't.
+function mc_render_via_solver(string $url): string {
+    $solver = rtrim(mc_solver_url(), '/');
+    $payload = json_encode([
+        'cmd' => 'request.get',
+        'url' => $url,
+        'maxTimeout' => 60000,
+    ]);
+    [$status, $body] = http_get($solver . '/v1', [
+        'Content-Type: application/json',
+        'Accept: application/json',
+    ], ['timeout' => 75, 'post' => $payload]);
+
+    if ($status < 200 || $status >= 300 || $body === '') {
+        return '';
+    }
+    $dec = json_decode($body, true);
+    if (!is_array($dec)) {
+        return '';
+    }
+    if (($dec['status'] ?? '') === 'ok' && isset($dec['solution']['response'])) {
+        return (string) $dec['solution']['response'];
+    }
+    return '';
+}
+
+// Last-resort: headless Chromium --dump-dom. Usually blocked by Cloudflare, but
+// harmless to try if FlareSolverr is unavailable.
+function mc_render_via_chromium(string $url): string {
     $ua = escapeshellarg(MC_USER_AGENT);
     $u = escapeshellarg($url);
     $cmd = sprintf(
@@ -50,6 +83,14 @@ function mc_render_html(string $url): string {
     );
     $out = shell_exec($cmd);
     return $out === null ? '' : $out;
+}
+
+function mc_render_html(string $url): string {
+    $html = mc_render_via_solver($url);
+    if ($html !== '') {
+        return $html;
+    }
+    return mc_render_via_chromium($url);
 }
 
 // ---------------------------------------------------------------------------
@@ -139,23 +180,25 @@ function mc_extract_card(DOMElement $card): ?array {
         }
     }
 
-    // Open-box price
+    // Open-box price — Micro Center shows it as the `itemprop="price"` span
+    // (text like "Our price $14,399.99"), not in a `@content` attribute.
     $ob_text = mc_first_text($card, [
+        './/*[@itemprop=\'price\']',
         './/*[' . mc_class_pred('price-wrapper') . ']//*[@itemprop=\'price\']',
-        './/*[@data-price]',
         './/*[' . mc_class_pred('product_price') . ']',
         './/*[' . mc_class_pred('price') . ']',
     ]);
     $open_box_price = mc_parse_price($ob_text);
 
-    // Regular price
+    // Regular (new) price — shown struck through as the "Original price".
     $reg_text = mc_first_text($card, [
+        './/strike',
+        './/del',
+        './/s',
         './/*[' . mc_class_pred('comp-price') . ']',
         './/*[' . mc_class_pred('compare-price') . ']',
         './/*[' . mc_class_pred('strikethrough') . ']',
         './/*[' . mc_class_pred('was-price') . ']',
-        './/del',
-        './/s',
     ]);
     $regular_price = mc_parse_price($reg_text);
     if ($regular_price === null) {

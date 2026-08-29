@@ -37,6 +37,10 @@ function http_get(string $url, array $headers = [], array $opts = []): array {
     curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
     curl_setopt($ch, CURLOPT_TIMEOUT, (int) ($opts['timeout'] ?? 25));
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int) ($opts['connect_timeout'] ?? 10));
+    if (!empty($opts['post'])) {
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $opts['post']);
+    }
     if ($headers) {
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     }
