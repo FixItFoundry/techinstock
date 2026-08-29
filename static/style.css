@@ -480,9 +480,9 @@ a {
 }
 .sticker-apple h2 em {
   font-style: normal;
-  color: #2997ff;
+  color: #a1a1a6;
 }
-.sticker-apple .tracker-features li::before { color: #2997ff; }
+.sticker-apple .tracker-features li::before { color: #a1a1a6; }
 
 .sticker-microcenter {
   background: linear-gradient(160deg, #181c26 0%, #11141c 100%);
