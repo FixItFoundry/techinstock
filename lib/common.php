@@ -102,11 +102,15 @@ function cache_read(string $file): ?array {
 function cache_write(string $file, $data): void {
     $dir = dirname($file);
     if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
+        @mkdir($dir, 0755, true);
     }
+    // Non-fatal: a cache write failing (e.g. read-only volume) must never
+    // corrupt the API response with a PHP warning.
     $tmp = $file . '.' . getmypid() . '.tmp';
-    file_put_contents($tmp, json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-    rename($tmp, $file);
+    if (@file_put_contents($tmp, json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) === false) {
+        return;
+    }
+    @rename($tmp, $file);
 }
 
 // Render a view file (HTML shell) to the client.

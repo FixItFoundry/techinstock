@@ -5,7 +5,7 @@ services:
     container_name: techinstock
     restart: unless-stopped
     ports:
-      - "8765:8000"
+      - "8765:80"
     environment:
       # Default ZIP shown in the Apple tracker on first load
       DEFAULT_ZIP: "11793"
@@ -16,5 +16,7 @@ services:
       # show a clear "set this and recreate" banner).
       BESTBUY_API_KEY: ""
     volumes:
-      # Persist catalogs + scrape caches across rebuilds
-      - ./data:/data
+      # Persist catalogs + scrape caches across rebuilds.
+      # :Z relabels the mount so the container (www-data) can write it under
+      # rootless runtimes (podman) with SELinux enabled.
+      - ./data:/data:Z

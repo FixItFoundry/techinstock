@@ -23,11 +23,15 @@ function products_save(array $data): void {
     $path = products_path();
     $dir = dirname($path);
     if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
+        @mkdir($dir, 0755, true);
     }
+    // Suppress warnings so a write failure can't corrupt the JSON response;
+    // the caller's send_json still emits valid output.
     $tmp = $path . '.' . getmypid() . '.tmp';
-    file_put_contents($tmp, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-    rename($tmp, $path);
+    if (@file_put_contents($tmp, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
+        send_json(['detail' => 'Unable to persist catalog (check volume permissions)'], 500);
+    }
+    @rename($tmp, $path);
 }
 
 function products_find_category_index(array $categories, string $id): int {

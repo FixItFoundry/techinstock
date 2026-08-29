@@ -17,24 +17,39 @@ const ZIP_KEY = "apple-stock:zip";
 let catalog = { categories: [] };
 let lastResult = null;
 
+// fetch JSON with a hard timeout + no-store so a slow Apple call can never
+// hang the UI forever, and we never serve a stale catalog.
+async function fetchJson(url, opts = {}) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 50000);
+  try {
+    const r = await fetch(url, { cache: "no-store", signal: ctrl.signal, ...opts });
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      throw new Error(d.detail || `HTTP ${r.status}`);
+    }
+    return await r.json();
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 async function init() {
-  const savedZip = localStorage.getItem(ZIP_KEY);
-  catalog = await fetchProducts();
-  els.zip.value = savedZip || catalog.default_zip || "";
-  await refresh();
+  try {
+    const savedZip = localStorage.getItem(ZIP_KEY);
+    catalog = await fetchProducts();
+    els.zip.value = savedZip || catalog.default_zip || "";
+    await refresh();
+  } catch (e) {
+    setStatus("err", e.message || "Failed to load catalog");
+  }
 }
 
 async function fetchProducts() {
-  const r = await fetch("/api/products");
-  return r.json();
+  return fetchJson("/api/products");
 }
 async function checkStock(zip) {
-  const r = await fetch(`/api/check?zip=${encodeURIComponent(zip)}`);
-  if (!r.ok) {
-    const detail = await r.json().catch(() => ({}));
-    throw new Error(detail.detail || `HTTP ${r.status}`);
-  }
-  return r.json();
+  return fetchJson(`/api/check?zip=${encodeURIComponent(zip)}`);
 }
 async function addProduct(payload) {
   const r = await fetch("/api/products", {

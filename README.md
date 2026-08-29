@@ -47,7 +47,7 @@ scrape on first load — hit **↻ refresh**). The Best Buy tracker needs an API
 | `BESTBUY_API_KEY` | *(unset)*             | Free key from [developer.bestbuy.com](https://developer.bestbuy.com)  |
 
 Change the host port by editing the `ports:` line in `docker-compose.yml`
-(default `8765:8000`).
+(default `8765:80`).
 
 ### Setting up the Best Buy API key
 
@@ -72,8 +72,10 @@ Add Apple part numbers (e.g. `MU9D3LL/A`) to a watchlist. The dashboard queries
 Apple's public fulfillment API for every part at once and shows which nearby
 stores have each model in stock for pickup.
 
-- Default catalog covers Mac mini (M4), Mac Studio (M4 Max), MacBook Air
-  (M4 / M4 Pro), MacBook Pro (M4 / M4 Pro).
+- Default catalog covers Mac mini (M5), Mac Studio (M5 Max), MacBook Air
+  (M5), MacBook Pro (M5 Pro). Apple retires part numbers periodically — if a
+  SKU comes back as "Product(s) Invalid or not buyable", replace it in
+  `products.json` / `data/products.json` with a current part number.
 - Add via the **＋ Add** button or by editing `data/products.json` directly.
 - Auto-refreshes every 5 minutes; press Enter or hit Refresh to force.
 - Double-click a name or part number to rename it inline; drag rows to reorder.
@@ -113,11 +115,14 @@ listing at 15% off.
 ## Architecture
 
 One PHP front controller (`index.php`) replaces FastAPI. No framework, no
-Composer — it runs on the built-in server (`php -S`) on the official `php:8.3-cli`
-image, which ships curl, dom, json and mbstring.
+Composer — it runs under **Apache + mod_php** (official `php:8.3-apache` image,
+with Chromium added for the Micro Center scraper). Apache serves `/static/*`
+natively and concurrently, and routes everything else to `index.php` via
+`FallbackResource`, so a slow Apple scrape can never block CSS/JS or other
+requests.
 
 ```
-index.php                  # router / front controller
+index.php                  # router / front controller (FallbackResource target)
 lib/
   common.php              # curl HTTP client, JSON helpers, file cache
   products.php            # Apple catalog load/save + CRUD
@@ -177,6 +182,10 @@ data/
 
 ## Running without Docker
 
+For production use just build the image (`docker compose build && docker compose
+up -d`) — it runs under Apache and is concurrency-safe. For a quick local hack
+without Apache:
+
 ```bash
 # needs php-cli >= 8.1 and chromium installed as `chromium`
 export DEFAULT_ZIP=11793
@@ -184,9 +193,14 @@ export BESTBUY_API_KEY=your-key-here   # optional
 php -S 0.0.0.0:8000 index.php
 ```
 
-> The built-in server is single-threaded, so a Micro Center or Best Buy refresh
-> blocks other requests until it finishes (10–30s). That's fine for a homelab
-> single-user box. For multi-user use, put it behind PHP-FPM + nginx.
+> The built-in `php -S` dev server is single-threaded, so a slow Apple/Micro
+> Center refresh blocks other requests (CSS/JS) until it finishes. Use the
+> Apache image for anything you actually rely on.
+
+The container runs as `www-data`; the entrypoint makes the mounted `/data`
+writable (and relabels it with `:Z` under rootless podman) so the catalog and
+caches can be written. `display_errors` is off so a failed cache write can never
+corrupt an API response with a PHP warning.
 
 ## Notes
 
