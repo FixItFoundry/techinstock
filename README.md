@@ -123,6 +123,15 @@ techinstock/
 
 ---
 
+## ⚖️ Disclaimer & Trademark Notice
+
+- **Not Affiliated**: This is an independent, non-commercial open-source project. It is **not** affiliated, associated, authorized, endorsed by, or in any way officially connected with Apple Inc., Micro Center, Best Buy Co., Inc., or any of their subsidiaries or affiliates.
+- **Trademarks**: All brand names, logos, product names, and registered trademarks referenced in this project are the property of their respective owners. Their inclusion is solely for nominative identification and informational tracking purposes under fair use.
+- **API & Site Terms**: Users are responsible for complying with the respective terms of service of any third-party APIs or websites they query with this software.
+- **Use at Your Own Risk**: This software is provided for personal homelab, informational, and educational purposes only, with no warranties of any kind.
+
+---
+
 ## 📄 License
 
-MIT License. Designed for personal and homelab tracking.
+This project is licensed under the [MIT License](LICENSE).
