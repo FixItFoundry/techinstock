@@ -31,7 +31,7 @@
     { id: 'xbox', name: 'Xbox', file: 'xbox.svg', w: 65, h: 65 },
     { id: 'gpd', name: 'GPD', file: 'gpd.svg', w: 90, h: 36 },
     { id: 'minisforum', name: 'Minisforum', file: 'minisforum.svg', w: 105, h: 34 },
-    { id: 'fractaldesign', name: 'Fractal Design', file: 'fractaldesign.svg', w: 95, h: 34 },
+    { id: 'fractaldesign', name: 'Fractal Design', file: 'fractaldesign.svg', w: 98, h: 30 },
     { id: 'thermalright', name: 'Thermalright', file: 'thermalright.svg', w: 95, h: 34 },
     { id: 'asrock', name: 'ASRock', file: 'asrock.svg', w: 95, h: 34 },
     { id: 'gigabyte', name: 'Gigabyte', file: 'gigabyte.svg', w: 95, h: 34 },
