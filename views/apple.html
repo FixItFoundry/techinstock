@@ -3,39 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>techinstock · Apple</title>
+<title>techinstock · Apple in Stock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
+<body class="page-apple">
 <header class="topbar">
   <div class="brand">
+    <img src="/static/apple-logo.svg" alt="Apple" class="brand-logo-img apple-logo-img">
     <h1>Apple <em>in Stock</em></h1>
+    <span class="sub">Store Pickup Tracker</span>
   </div>
   <div class="controls">
-    <a href="/" class="home-link">← home</a>
+    <a href="/" class="home-link">← Hub</a>
     <label class="zip-field">
       <span>ZIP</span>
-      <input id="zip" type="text" inputmode="numeric" maxlength="5" />
+      <input id="zip" type="text" inputmode="numeric" maxlength="5" placeholder="10001" />
     </label>
-    <button id="refresh" class="btn-primary"><span class="btn-label">Refresh</span><span class="btn-kbd">⏎</span></button>
-    <button id="add-toggle" class="btn-ghost" title="Track a new part number">＋ Add</button>
+    <button id="refresh" class="btn-primary"><span class="btn-label">Check Stock</span><span class="btn-kbd">⏎</span></button>
+    <button id="add-toggle" class="btn-ghost" title="Track a new part number">＋ Track SKU</button>
   </div>
 </header>
 
 <section id="add-panel" class="add-panel" hidden>
   <form id="add-form">
-    <input name="category_id" placeholder="category (e.g. mac-mini)" required />
-    <input name="part" placeholder="part number (e.g. MU9D3LL/A)" required />
-    <input name="name" placeholder="friendly name" required />
-    <button type="submit" class="btn-primary">Add</button>
+    <input name="category_id" placeholder="Category (e.g. mac-mini)" required />
+    <input name="part" placeholder="Part Number (e.g. MU9D3LL/A)" required />
+    <input name="name" placeholder="Device Name / Configuration" required />
+    <button type="submit" class="btn-primary">Add to Watchlist</button>
   </form>
-  <p class="hint">Find part numbers in the apple.com URL after configuring a Mac (e.g. <code>?mtm=MU9D3LL/A</code>). Category name is inferred from the ID — reuse one to group.</p>
+  <p class="hint">Find part numbers in the apple.com URL after configuring hardware (e.g. <code>?mtm=MU9D3LL/A</code>). Categories auto-group by ID.</p>
 </section>
 
 <main id="dashboard" class="dashboard">
   <div class="status-bar">
     <span id="status-dot" class="dot dot-ok"></span>
-    <span id="status-text">Loading…</span>
+    <span id="status-text">Loading store availability…</span>
     <span class="status-spacer"></span>
     <span id="last-checked" class="last-checked"></span>
   </div>
@@ -43,7 +48,7 @@
 </main>
 
 <footer class="footer">
-  <span>Self-hosted · data from apple.com/shop</span>
+  <span>Self-hosted · Real-time data from apple.com/shop pickup API</span>
   <span id="store-count"></span>
 </footer>
 

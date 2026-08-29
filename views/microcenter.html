@@ -3,56 +3,69 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>techinstock · Micro Center</title>
+<title>techinstock · Micro Center Open Box Deals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
+<body class="page-microcenter">
 <header>
   <div class="brand">
-    Open Box Hunter
-    <small>microcenter · ny region</small>
+    <img src="/static/microcenter-logo.svg" alt="Micro Center" class="brand-logo-img mc-logo-img">
+    <div class="brand-text">
+      <h1>Open Box <em>Deals</em></h1>
+      <small>Live Inventory · NY Metro Stores</small>
+    </div>
   </div>
   <div class="stat-bar" id="statbar">
-    <span>store: <b id="stat-store">—</b></span>
-    <span>deals: <b id="stat-count">0</b></span>
-    <span>updated: <b id="stat-time">never</b></span>
+    <div class="stat-item"><span class="stat-lbl">Store</span><b id="stat-store">—</b></div>
+    <div class="stat-item"><span class="stat-lbl">Deals</span><b id="stat-count">0</b></div>
+    <div class="stat-item"><span class="stat-lbl">Updated</span><b id="stat-time">never</b></div>
   </div>
-  <a class="home-link" href="/">← home</a>
-  <button class="primary" id="refresh-btn">↻ refresh</button>
+  <div class="header-actions">
+    <a class="home-link" href="/">← Hub</a>
+    <button class="primary" id="refresh-btn">↻ Fetch Live Scrape</button>
+  </div>
 </header>
 
-<section class="controls">
+<section class="controls mc-store-bar">
   <div class="group">
-    <span class="group-label">store</span>
-    <div id="store-tabs" class="group"></div>
-  </div>
-  <div class="group">
-    <span class="group-label">sort</span>
-    <button class="chip active" data-sort="discount_pct">% off</button>
-    <button class="chip" data-sort="discount_dollars">$ saved</button>
-    <button class="chip" data-sort="open_box_price">price ↑</button>
-    <button class="chip" data-sort="-open_box_price">price ↓</button>
-  </div>
-  <div class="group">
-    <span class="group-label">min %</span>
-    <input type="number" id="min-pct" min="0" max="90" step="5" value="0">
-  </div>
-  <div class="group">
-    <span class="group-label">find</span>
-    <input type="search" id="search" placeholder="search by name…">
+    <span class="group-label">Select Store</span>
+    <div id="store-tabs" class="group store-tabs-wrap"></div>
   </div>
 </section>
 
-<section class="controls" style="padding-top:12px;padding-bottom:12px;">
+<section class="controls mc-filter-bar">
   <div class="group">
-    <span class="group-label">category</span>
-    <div id="cat-chips" class="group"></div>
+    <span class="group-label">Sort Deals</span>
+    <div class="sort-chips-group">
+      <button class="chip active" data-sort="discount_pct">% Off</button>
+      <button class="chip" data-sort="discount_dollars">$ Saved</button>
+      <button class="chip" data-sort="open_box_price">Price: Low → High</button>
+      <button class="chip" data-sort="-open_box_price">Price: High → Low</button>
+    </div>
+  </div>
+  <div class="group">
+    <span class="group-label">Min % Off</span>
+    <input type="number" id="min-pct" min="0" max="90" step="5" value="0">
+  </div>
+  <div class="group flex-grow">
+    <span class="group-label">Search Inventory</span>
+    <input type="search" id="search" placeholder="Search GPUs, laptops, monitors, CPUs…">
+  </div>
+</section>
+
+<section class="controls mc-category-bar">
+  <div class="group">
+    <span class="group-label">Categories</span>
+    <div id="cat-chips" class="group cat-chips-wrap"></div>
   </div>
 </section>
 
 <main>
   <div class="meta-line">
-    <span><span class="total" id="meta-total">0</span> matching deals</span>
+    <span><span class="total" id="meta-total">0</span> matching open-box deals</span>
     <span id="meta-extra"></span>
   </div>
   <div id="deals" class="deals"></div>

@@ -3,50 +3,102 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>techinstock</title>
+<title>techinstock · Urban Cyberpunk Stock Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
+<body class="page-home">
+<div class="cyber-bg-overlay"></div>
 <div class="home">
-  <h1>tech<em>in</em>stock</h1>
-  <p class="tagline">Three availability trackers, one homelab box. Self-hosted, no accounts.</p>
+  
+  <!-- Cyberpunk Sticker Bomb Hero Header -->
+  <header class="home-hero">
+    <div class="hero-title-wrap">
+      <h1 class="glitch-title" data-text="techinstock">
+        <span class="brand-tech">TECH</span><span class="brand-in">IN</span><span class="brand-stock">STOCK</span>
+      </h1>
+    </div>
 
+    <p class="tagline">
+      Open-box, clearance, and availability tracking for Best Buy, Micro Center, and Apple.
+    </p>
+  </header>
+
+  <!-- Sticker Bomb Tracker Cards Grid -->
   <div class="tracker-grid">
-    <a class="tracker" href="/apple">
-      <span class="num">01 · apple</span>
+    
+    <!-- Apple Stock Tracker Sticker Card -->
+    <a class="tracker sticker-card sticker-apple sticker-tilt-1" href="/apple">
+      <div class="sticker-peel-corner"></div>
+      <div class="sticker-header">
+        <span class="num badge-apple-tag">01 // APPLE.COM</span>
+        <img src="/static/apple-logo.svg" alt="Apple" class="sticker-brand-logo">
+      </div>
       <h2>Apple <em>Stock</em></h2>
-      <p class="blurb">Pickup availability for part numbers you track, across nearby stores.</p>
-      <ul>
-        <li>watchlist by part number</li>
-        <li>multi-store, auto-refresh</li>
+      <p class="blurb">Real-time local pickup availability for custom & retail SKUs across Apple Store locations.</p>
+      <ul class="tracker-features">
+        <li>Watchlist by Part Number (M4, Pro, Max)</li>
+        <li>Multi-store distance & pickup status</li>
       </ul>
-      <div class="stats"><span>tracked <b id="apple-tracked">—</b></span><span>zip <b id="apple-zip">—</b></span></div>
+      <div class="stats">
+        <span>TRACKED <b id="apple-tracked">—</b></span>
+        <span>ZIP <b id="apple-zip">—</b></span>
+      </div>
+      <div class="card-action-bar">
+        <span class="action-btn-pill">LAUNCH TRACKER →</span>
+      </div>
     </a>
 
-    <a class="tracker" href="/microcenter">
-      <span class="num">02 · micro center</span>
-      <h2>Open Box <em>Hunter</em></h2>
-      <p class="blurb">Open-box deals across the four NY-area stores, ranked by % off.</p>
-      <ul>
-        <li>per-store inventory</li>
-        <li>regular vs open-box</li>
+    <!-- Micro Center Open Box Sticker Card -->
+    <a class="tracker sticker-card sticker-microcenter sticker-tilt-2" href="/microcenter">
+      <div class="sticker-peel-corner"></div>
+      <div class="sticker-header">
+        <span class="num badge-mc-tag">02 // MICRO CENTER</span>
+        <img src="/static/microcenter-logo.svg" alt="Micro Center" class="sticker-brand-logo">
+      </div>
+      <h2>Open Box <em>Deals</em></h2>
+      <p class="blurb">Unbeatable clearance & open-box deals scraped across NY-area stores, ranked by discount %.</p>
+      <ul class="tracker-features">
+        <li>Per-store live inventory & categories</li>
+        <li>Retail vs Open-Box price savings</li>
       </ul>
-      <div class="stats"><span>cached <b id="mc-count">—</b></span><span>updated <b id="mc-time">—</b></span></div>
+      <div class="stats">
+        <span>CACHED <b id="mc-count">—</b></span>
+        <span>UPDATED <b id="mc-time">—</b></span>
+      </div>
+      <div class="card-action-bar">
+        <span class="action-btn-pill">HUNT DEALS →</span>
+      </div>
     </a>
 
-    <a class="tracker" href="/bestbuy">
-      <span class="num">03 · best buy</span>
-      <h2>Best Buy <em>Open Box</em></h2>
-      <p class="blurb">Open-box across the catalog via the official developer API.</p>
-      <ul>
-        <li>condition tier sort</li>
-        <li>excellent → fair</li>
+    <!-- Best Buy Open Box Sticker Card -->
+    <a class="tracker sticker-card sticker-bestbuy sticker-tilt-3" href="/bestbuy">
+      <div class="sticker-peel-corner"></div>
+      <div class="sticker-header">
+        <span class="num badge-bb-tag">03 // BEST BUY</span>
+        <img src="/static/bestbuy-logo.svg" alt="Best Buy" class="sticker-brand-logo">
+      </div>
+      <h2>Best Buy <em>Deals</em></h2>
+      <p class="blurb">Catalog-wide open-box pricing and verified discount rankings powered by official developer APIs.</p>
+      <ul class="tracker-features">
+        <li>Condition tiers: Certified → Fair</li>
+        <li>Live stock & dollar savings filter</li>
       </ul>
-      <div class="stats"><span>cached <b id="bb-count">—</b></span><span>updated <b id="bb-time">—</b></span></div>
+      <div class="stats">
+        <span>CACHED <b id="bb-count">—</b></span>
+        <span>UPDATED <b id="bb-time">—</b></span>
+      </div>
+      <div class="card-action-bar">
+        <span class="action-btn-pill">BROWSE OUTLET →</span>
+      </div>
     </a>
+
   </div>
 
-  <div class="foot"><a href="/healthz">/healthz</a> · self-hosted</div>
+  <!-- Bottom Divider Line -->
+  <footer class="home-foot"></footer>
 </div>
 
 <script>

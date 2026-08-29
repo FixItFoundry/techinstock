@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <defs>
+    <style>
+      .trace { stroke: rgba(0, 240, 255, 0.12); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .trace-accent { stroke: rgba(0, 240, 255, 0.22); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .bus { stroke: rgba(255, 0, 85, 0.10); stroke-width: 1.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .via { fill: #0a0d14; stroke: rgba(0, 240, 255, 0.35); stroke-width: 1.5; }
+      .via-dot { fill: rgba(0, 240, 255, 0.6); }
+      .chip-pad { fill: rgba(255, 255, 255, 0.03); stroke: rgba(0, 240, 255, 0.15); stroke-width: 1; }
+    </style>
+  </defs>
+
+  <!-- IC Chip Footprint -->
+  <rect class="chip-pad" x="70" y="70" width="20" height="20" rx="3" />
+
+  <!-- Circuit Traces with 45-degree bends -->
+  <path class="trace" d="M0 40 L50 40 L70 20 L130 20 L150 40 L160 40" />
+  <path class="trace" d="M20 0 L20 30 L40 50 L40 110 L20 130 L20 160" />
+  <path class="trace" d="M0 120 L40 120 L60 140 L120 140 L140 120 L160 120" />
+  <path class="trace-accent" d="M60 0 L60 20 L80 40 L120 40 L140 60 L140 100 L120 120 L80 120 L60 140 L60 160" />
+  <path class="trace" d="M100 0 L100 30 L110 40 L110 70 L90 90 L90 130 L100 140 L100 160" />
+  <path class="bus" d="M0 70 L40 70 L50 80 L80 80 L90 70 L160 70" />
+  <path class="bus" d="M0 90 L30 90 L40 100 L70 100 L80 90 L160 90" />
+
+  <!-- Vias / Solder Pads -->
+  <circle class="via" cx="50" cy="40" r="3.5" />
+  <circle class="via-dot" cx="50" cy="40" r="1.2" />
+
+  <circle class="via" cx="130" cy="20" r="3.5" />
+  <circle class="via-dot" cx="130" cy="20" r="1.2" />
+
+  <circle class="via" cx="40" cy="110" r="3.5" />
+  <circle class="via-dot" cx="40" cy="110" r="1.2" />
+
+  <circle class="via" cx="120" cy="140" r="3.5" />
+  <circle class="via-dot" cx="120" cy="140" r="1.2" />
+
+  <circle class="via" cx="80" cy="40" r="3.5" />
+  <circle class="via-dot" cx="80" cy="40" r="1.2" />
+
+  <circle class="via" cx="140" cy="60" r="3.5" />
+  <circle class="via-dot" cx="140" cy="60" r="1.2" />
+
+  <circle class="via" cx="140" cy="100" r="3.5" />
+  <circle class="via-dot" cx="140" cy="100" r="1.2" />
+
+  <circle class="via" cx="80" cy="120" r="3.5" />
+  <circle class="via-dot" cx="80" cy="120" r="1.2" />
+
+  <circle class="via" cx="40" cy="70" r="3" />
+  <circle class="via-dot" cx="40" cy="70" r="1" />
+
+  <circle class="via" cx="120" cy="70" r="3" />
+  <circle class="via-dot" cx="120" cy="70" r="1" />
+</svg>
