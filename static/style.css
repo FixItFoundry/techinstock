@@ -181,8 +181,9 @@ a {
 .sticker-steam .sticker-diecut-wrap,
 .sticker-steamdeck .sticker-diecut-wrap,
 .sticker-sony .sticker-diecut-wrap,
-.sticker-windows .sticker-diecut-wrap {
-  background: #0f141f;
+.sticker-windows .sticker-diecut-wrap,
+.sticker-bestbuy .sticker-diecut-wrap {
+  background: #0046be;
   border-color: #ffffff;
 }
 
