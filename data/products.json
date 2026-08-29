@@ -5,12 +5,12 @@
       "name": "Mac Mini",
       "products": [
         {
-          "part": "MU9E3LL/A",
-          "name": "Mac mini (M4, 16GB / 512GB)"
+          "part": "MHQN4LL/A",
+          "name": "Mac mini (M5, 16GB / 256GB)"
         },
         {
-          "part": "MU9D3LL/A",
-          "name": "Mac mini (M4, 16GB / 256GB)"
+          "part": "MHQK4LL/A",
+          "name": "Mac mini (M5, 16GB / 512GB)"
         }
       ]
     },
@@ -19,8 +19,12 @@
       "name": "Mac Studio",
       "products": [
         {
-          "part": "MU963LL/A",
-          "name": "Mac Studio (M4 Max, 36GB / 512GB)"
+          "part": "MHL64LL/A",
+          "name": "Mac Studio (M5 Max, 36GB / 512GB)"
+        },
+        {
+          "part": "MHL74LL/A",
+          "name": "Mac Studio (M5 Max, 48GB / 1TB)"
         }
       ]
     },
