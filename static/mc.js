@@ -128,7 +128,7 @@ async function refresh() {
   btn.disabled = true;
   const orig = btn.textContent;
   btn.innerHTML = '<span class="spinner" style="border-top-color:#fff"></span>scraping…';
-  $("#deals").innerHTML = '<div class="loading"><span class="spinner"></span>fetching live from micro center… this can take 10–30s</div>';
+  $("#deals").innerHTML = '<div class="loading"><span class="spinner"></span>fetching data from Micro Center... this can take a minute...</div>';
   try {
     state.snapshot = await fetch("/microcenter/api/refresh?store=" + state.storeKey, { method: "POST" }).then(r => r.json());
     renderCategoryChips();
