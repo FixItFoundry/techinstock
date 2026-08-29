@@ -186,6 +186,7 @@ a {
   border-color: #ffffff;
 }
 
+/* Subtle, transparent vignette so the sticker bomb wall is clearly visible, while hero/cards pop cleanly */
 .cyber-bg-overlay {
   position: fixed;
   top: 0;
@@ -195,13 +196,13 @@ a {
   pointer-events: none;
   z-index: 1;
   background: 
-    radial-gradient(ellipse at 50% 30%, rgba(10, 13, 20, 0.65) 0%, rgba(10, 13, 20, 0.85) 75%, rgba(6, 8, 12, 0.95) 100%),
-    linear-gradient(180deg, rgba(10, 13, 20, 0.5) 0%, rgba(10, 13, 20, 0.85) 100%);
-  backdrop-filter: blur(0.5px);
+    radial-gradient(ellipse at 50% 30%, rgba(10, 13, 20, 0.25) 0%, rgba(10, 13, 20, 0.55) 75%, rgba(6, 8, 12, 0.75) 100%),
+    linear-gradient(180deg, rgba(10, 13, 20, 0.2) 0%, rgba(10, 13, 20, 0.55) 100%);
+  backdrop-filter: blur(0px);
 }
 
 .page-home {
-  background-color: var(--cyber-bg);
+  background-color: #0b0f19;
   color: var(--cyber-text);
   font-family: var(--font-sans);
   overflow-x: hidden;
@@ -222,6 +223,17 @@ a {
   text-align: center;
   margin-bottom: 52px;
   position: relative;
+}
+
+.home-hero-badge {
+  display: inline-block;
+  background: rgba(12, 16, 26, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 24px 36px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
 }
 
 /* Tilt Angles */
