@@ -368,12 +368,14 @@ function mc_fetch_store(string $store_key): array {
     try {
         for (; $page <= MC_MAX_PAGES; $page++) {
             $params = [
-                'fq' => MC_OPEN_BOX_FQ,
+                'N' => '0',
+                'NTK' => 'all',
+                'sortby' => 'match',
+                'rpp' => (string) MC_PAGE_SIZE,
+                'page' => (string) $page,
                 'storeid' => $meta['id'],
                 'myStore' => 'true',
-                'pagecount' => (string) MC_PAGE_SIZE,
-                'currentpage' => (string) $page,
-                'sortby' => 'match',
+                'fq' => MC_OPEN_BOX_FQ,
             ];
             $url = MC_SEARCH_URL . '?' . http_build_query($params);
             $html = mc_render_html($url);
