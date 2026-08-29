@@ -173,17 +173,21 @@ a {
     inset 0 1px 2px rgba(255, 255, 255, 1);
 }
 
-/* Specialized badge backgrounds for white/light vector decals */
-.sticker-minisforum .sticker-diecut-wrap,
-.sticker-apple .sticker-diecut-wrap,
-.sticker-alienware .sticker-diecut-wrap,
-.sticker-asusrog .sticker-diecut-wrap,
+/* Specialized badge backgrounds */
+.sticker-minisforum .sticker-diecut-wrap {
+  background: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+.sticker-apple .sticker-diecut-wrap {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
 .sticker-steam .sticker-diecut-wrap,
-.sticker-steamdeck .sticker-diecut-wrap,
-.sticker-sony .sticker-diecut-wrap,
-.sticker-windows .sticker-diecut-wrap,
-.sticker-bestbuy .sticker-diecut-wrap {
-  background: #0046be;
+.sticker-asusrog .sticker-diecut-wrap,
+.sticker-alienware .sticker-diecut-wrap {
+  background: #0f141f;
   border-color: #ffffff;
 }
 
