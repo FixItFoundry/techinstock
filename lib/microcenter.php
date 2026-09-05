@@ -15,21 +15,23 @@ declare(strict_types=1);
 require_once __DIR__ . '/common.php';
 
 const MC_STORES = [
+    // Arizona
+    'phoenix'         => ['id' => '205', 'name' => 'Phoenix, AZ', 'state' => 'AZ'],
     // California
     'tustin'          => ['id' => '101', 'name' => 'Tustin, CA', 'state' => 'CA'],
     'santa-clara'     => ['id' => '195', 'name' => 'Santa Clara, CA', 'state' => 'CA'],
     // Colorado
     'denver'          => ['id' => '181', 'name' => 'Denver, CO', 'state' => 'CO'],
     // Florida
-    'miami'           => ['id' => '045', 'name' => 'Miami, FL', 'state' => 'FL'],
+    'miami'           => ['id' => '185', 'name' => 'Miami, FL', 'state' => 'FL'],
     // Georgia
-    'duluth'          => ['id' => '041', 'name' => 'Duluth, GA', 'state' => 'GA'],
-    'marietta'        => ['id' => '171', 'name' => 'Marietta, GA', 'state' => 'GA'],
+    'duluth'          => ['id' => '065', 'name' => 'Duluth, GA', 'state' => 'GA'],
+    'marietta'        => ['id' => '041', 'name' => 'Marietta, GA', 'state' => 'GA'],
     // Illinois
     'chicago'         => ['id' => '151', 'name' => 'Chicago, IL', 'state' => 'IL'],
     'westmont'        => ['id' => '025', 'name' => 'Westmont, IL', 'state' => 'IL'],
     // Indiana
-    'indianapolis'    => ['id' => '131', 'name' => 'Indianapolis, IN', 'state' => 'IN'],
+    'indianapolis'    => ['id' => '165', 'name' => 'Indianapolis, IN', 'state' => 'IN'],
     // Kansas
     'overland-park'   => ['id' => '191', 'name' => 'Overland Park, KS', 'state' => 'KS'],
     // Massachusetts
@@ -44,12 +46,12 @@ const MC_STORES = [
     // Missouri
     'brentwood'       => ['id' => '095', 'name' => 'Brentwood (St. Louis), MO', 'state' => 'MO'],
     // North Carolina
-    'charlotte'       => ['id' => '165', 'name' => 'Charlotte, NC', 'state' => 'NC'],
+    'charlotte'       => ['id' => '175', 'name' => 'Charlotte, NC', 'state' => 'NC'],
     // New Jersey
     'paterson'        => ['id' => '075', 'name' => 'North Jersey (Paterson), NJ', 'state' => 'NJ'],
     // New York
-    'westbury'        => ['id' => '065', 'name' => 'Westbury, NY', 'state' => 'NY'],
-    'flushing'        => ['id' => '051', 'name' => 'Flushing, NY', 'state' => 'NY'],
+    'westbury'        => ['id' => '171', 'name' => 'Westbury, NY', 'state' => 'NY'],
+    'flushing'        => ['id' => '145', 'name' => 'Flushing, NY', 'state' => 'NY'],
     'yonkers'         => ['id' => '105', 'name' => 'Yonkers, NY', 'state' => 'NY'],
     'brooklyn'        => ['id' => '115', 'name' => 'Brooklyn, NY', 'state' => 'NY'],
     // Ohio
@@ -60,7 +62,8 @@ const MC_STORES = [
     'st-davids'       => ['id' => '061', 'name' => 'St. Davids, PA', 'state' => 'PA'],
     // Texas
     'houston'         => ['id' => '155', 'name' => 'Houston, TX', 'state' => 'TX'],
-    'dallas'          => ['id' => '135', 'name' => 'Dallas (Richardson), TX', 'state' => 'TX'],
+    'dallas'          => ['id' => '131', 'name' => 'Dallas (Richardson), TX', 'state' => 'TX'],
+    'austin'          => ['id' => '215', 'name' => 'Austin, TX', 'state' => 'TX'],
     // Virginia
     'fairfax'         => ['id' => '081', 'name' => 'Fairfax, VA', 'state' => 'VA'],
 ];
@@ -188,7 +191,7 @@ function mc_parse_price(?string $text): ?float {
 // Card extraction
 // ---------------------------------------------------------------------------
 
-function mc_extract_card(DOMElement $card): ?array {
+function mc_extract_card(DOMElement $card, string $store_id = ''): ?array {
     // Name + product URL
     $a = mc_xpath_one($card, './/a[' . mc_class_pred('productClickItemV2') . ']')
         ?? mc_xpath_one($card, './/h2/a')
@@ -202,6 +205,22 @@ function mc_extract_card(DOMElement $card): ?array {
     }
     $href = mc_attr($a, 'href');
     $url = str_starts_with($href, 'http') ? $href : 'https://www.microcenter.com' . $href;
+
+    // Preserve storeId so clicking the deal in a browser loads the exact store and open-box offer
+    if ($store_id !== '') {
+        $parsed = parse_url($url);
+        $query = [];
+        if (isset($parsed['query'])) {
+            parse_str($parsed['query'], $query);
+        }
+        $query['storeid'] = $store_id;
+        $query['storeSelected'] = $store_id;
+        if (!isset($query['ob'])) {
+            $query['ob'] = '1';
+        }
+        $new_query = http_build_query($query);
+        $url = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? 'www.microcenter.com') . ($parsed['path'] ?? '') . '?' . $new_query;
+    }
 
     // SKU
     $sku = mc_attr($card, 'data-id') ?: mc_attr($card, 'data-sku');
@@ -254,11 +273,11 @@ function mc_extract_card(DOMElement $card): ?array {
 
     $open_box_price = null;
     $regular_price = null;
-    if ($ob_label_txt !== null) {
+    if ($ob_label_txt !== null && (stripos($ob_label_txt, 'open box') !== false || mc_xpath_one($card, './/*[' . mc_class_pred('compareTo') . ']') !== null)) {
         // Layout B: compareTo = open-box price, itemprop = regular price.
         $regular_price = mc_parse_price($itemprop_txt);
         $open_box_price = mc_parse_price($ob_label_txt);
-    } elseif ($strike_txt !== null) {
+    } elseif ($strike_txt !== null && (stripos($card->textContent, 'open box') !== false || stripos($url, 'ob=1') !== false)) {
         // Layout A: itemprop = open-box price, strike = regular price.
         $open_box_price = mc_parse_price($itemprop_txt);
         $regular_price = mc_parse_price($strike_txt);
@@ -314,7 +333,7 @@ function mc_extract_card(DOMElement $card): ?array {
     ];
 }
 
-function mc_parse_listing(string $html): array {
+function mc_parse_listing(string $html, string $store_id = ''): array {
     $doc = new DOMDocument();
     libxml_use_internal_errors(true);
     $doc->loadHTML('<?xml encoding="utf-8"?>' . $html, LIBXML_NOERROR | LIBXML_NOWARNING);
@@ -333,7 +352,7 @@ function mc_parse_listing(string $html): array {
                 continue;
             }
             try {
-                $d = mc_extract_card($c);
+                $d = mc_extract_card($c, $store_id);
                 if ($d) {
                     $out[] = $d;
                 }
@@ -383,7 +402,7 @@ function mc_fetch_store(string $store_key): array {
                 $snap['error'] = "page $page: chromium returned no HTML";
                 break;
             }
-            $page_deals = mc_parse_listing($html);
+            $page_deals = mc_parse_listing($html, $meta['id']);
 
             $new = 0;
             foreach ($page_deals as $d) {

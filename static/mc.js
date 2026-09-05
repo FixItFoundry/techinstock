@@ -11,6 +11,7 @@ const state = {
 };
 
 const STATE_NAMES = {
+  AZ: "Arizona",
   CA: "California",
   CO: "Colorado",
   FL: "Florida",

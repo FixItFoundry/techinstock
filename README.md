@@ -45,10 +45,10 @@ Tracks local Apple Store pickup availability for custom and retail SKUs.
   - Configurable ZIP code with persistent local caching.
 
 ### 2. Micro Center Open Box (`/microcenter`)
-Scrapes open-box clearance inventory across **29 Micro Center locations nationwide across 19 US States**.
+Scrapes open-box clearance inventory across **31 Micro Center locations nationwide across 20 US States**.
 - **Methodology**: Queries Micro Center's full open-box catalog using a **FlareSolverr** sidecar to navigate Cloudflare protection, parsing live pricing and discount tiers.
 - **Features**:
-  - **State & Location Selector**: Filter deals by US State (CA, CO, FL, GA, IL, IN, KS, MA, MD, MI, MN, MO, NC, NJ, NY, OH, PA, TX, VA) and local store.
+  - **State & Location Selector**: Filter deals by US State (AZ, CA, CO, FL, GA, IL, IN, KS, MA, MD, MI, MN, MO, NC, NJ, NY, OH, PA, TX, VA) and local store.
   - **Discount Rankings**: Ranked by highest **% Off** first, **$ Saved**, or Price.
   - **Category Chips**: Auto-discovered categories (Laptops, Apple, Desktops, GPUs, Monitors, etc.) with real-time deal counts.
 
